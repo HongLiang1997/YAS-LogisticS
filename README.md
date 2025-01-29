@@ -68,7 +68,7 @@ This code trains a **Convolutional Neural Network (CNN)** to detect different re
 Load dataset -> Apply preprocessing -> Build CNN model -> Train model -> Save trained model
 ```
 
-## Item Detection Script
+## Item Detection Script (test_without_webcam.py)
 ### Description
 This script processes an image containing multiple boxes to detect whether an item is present in each box. If an item is detected, a trained machine learning model classifies the type of item. The processed image is then saved with detected boxes highlighted.
 
@@ -82,7 +82,7 @@ This script processes an image containing multiple boxes to detect whether an it
 6. Save the processed image with annotations and return results.
 ```
 
-### Step-by-Step Breakdown (test_without_webcam.py)
+### Step-by-Step Breakdown
 1. **Load the Image**
    - The script reads the input image using OpenCV (`cv2.imread`).
    - If the image cannot be loaded, it prints an error and exits.
