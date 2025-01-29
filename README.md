@@ -41,7 +41,7 @@ To address these issues, we propose the development of an **automated equipment 
 
 ---
 
-## Item Detection Model
+## Item Detection Model (item_machine_learning.py)
 ### Description
 This code trains a **Convolutional Neural Network (CNN)** to detect different rental items, specifically `raspberrypi4` and `raspberrypi4charger`. The model is trained using TensorFlow and Keras on a dataset of categorized images. 
 
@@ -67,3 +67,59 @@ This code trains a **Convolutional Neural Network (CNN)** to detect different re
 ```
 Load dataset -> Apply preprocessing -> Build CNN model -> Train model -> Save trained model
 ```
+
+## Item Detection Script
+### Description
+This script processes an image containing multiple boxes to detect whether an item is present in each box. If an item is detected, a trained machine learning model classifies the type of item. The processed image is then saved with detected boxes highlighted.
+
+### Simple Flow of Execution
+```
+1. Load the image.
+2. Convert it to grayscale and apply thresholding to identify boxes.
+3. Detect rectangular boxes based on contours.
+4. Extract each box and determine if an item is inside.
+5. If an item is detected, classify it using a trained deep learning model.
+6. Save the processed image with annotations and return results.
+```
+
+### Step-by-Step Breakdown (test_without_webcam.py)
+1. **Load the Image**
+   - The script reads the input image using OpenCV (`cv2.imread`).
+   - If the image cannot be loaded, it prints an error and exits.
+
+2. **Preprocess the Image**
+   - Converts the image to grayscale (`cv2.cvtColor`).
+   - Applies thresholding to create a binary mask that highlights the boxes.
+   - Finds contours to identify rectangular box regions.
+
+3. **Detect and Extract Boxes**
+   - Filters out small or irregular shapes, keeping only rectangular boxes.
+   - Stores box coordinates and sorts them for consistency.
+
+4. **Analyze Each Box**
+   - Crops each box and converts it to grayscale.
+   - Applies a threshold to detect non-white pixels, indicating the presence of an item.
+
+5. **Classify the Item (if detected)**
+   - Resizes the detected item image to match the input shape of the trained `item_detection_model.h5`.
+   - Uses `img_to_array` to convert the image for model prediction.
+   - Feeds it into the TensorFlow model to classify the item.
+   - If confidence is below `68%`, labels it as "Unknown."
+
+6. **Draw Boxes and Save Output**
+   - Draws bounding boxes around detected items and labels them.
+   - Saves the processed image with annotations.
+
+7. **Output the Results**
+   - Prints the details of detected boxes and items.
+  
+---
+
+## Before and After Image Comparison
+Below are sample images demonstrating the **Before and After** item detection process:
+
+### Before Detection
+![Before Image](AnalysisCodes/3_item.jpg)
+
+### After Detection
+![After Image](AnalysisCodes/output_detected_boxes_with_items.jpg)
