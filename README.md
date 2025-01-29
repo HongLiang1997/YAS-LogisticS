@@ -38,3 +38,32 @@ To address these issues, we propose the development of an **automated equipment 
 #### Error Reduction
 - Automate the validation process to minimize human error in credential input and equipment allocation.
 - Implement data validation checks to ensure the accuracy of student and equipment information.
+
+---
+
+## Item Detection Model
+### Description
+This code trains a **Convolutional Neural Network (CNN)** to detect different rental items, specifically `raspberrypi4` and `raspberrypi4charger`. The model is trained using TensorFlow and Keras on a dataset of categorized images. 
+
+### How It Works
+1. **Data Preprocessing**
+   - Loads training and validation images from directories.
+   - Applies data augmentation (rotation, shifting, flipping) to improve generalization.
+   - Rescales images to a normalized pixel range of `[0,1]`.
+
+2. **Model Architecture**
+   - Three convolutional layers extract important features.
+   - Each layer is followed by max pooling to reduce dimensionality.
+   - The extracted features are flattened and passed through a fully connected layer.
+   - Dropout is used to prevent overfitting.
+   - The final softmax layer outputs predictions for two classes (`raspberrypi4`, `raspberrypi4charger`).
+
+3. **Training Process**
+   - The model is compiled using Adam optimizer and categorical cross-entropy loss.
+   - It is trained over `50 epochs` using the prepared training and validation datasets.
+   - The trained model is saved as `item_detection_model.h5`.
+
+### Simple Flow
+```
+Load dataset -> Apply preprocessing -> Build CNN model -> Train model -> Save trained model
+```
