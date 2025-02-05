@@ -41,11 +41,12 @@ To address these issues, we propose the development of an **automated equipment 
 
 ---
 
-## Item Detection Model (item_machine_learning.py)
-### Description
+## Black Bordered Box System
+### Item Detection Model (item_machine_learning.py)
+#### Description
 This code trains a **Convolutional Neural Network (CNN)** to detect different rental items, specifically `raspberrypi4` and `raspberrypi4charger`. The model is trained using TensorFlow and Keras on a dataset of categorized images. 
 
-### How It Works
+#### How It Works
 1. **Data Preprocessing**
    - Loads training and validation images from directories.
    - Applies data augmentation (rotation, shifting, flipping) to improve generalization.
@@ -63,16 +64,16 @@ This code trains a **Convolutional Neural Network (CNN)** to detect different re
    - It is trained over `50 epochs` using the prepared training and validation datasets.
    - The trained model is saved as `item_detection_model.h5`.
 
-### Simple Flow
+#### Simple Flow
 ```
 Load dataset -> Apply preprocessing -> Build CNN model -> Train model -> Save trained model
 ```
 
-## Item Detection Script (test_without_webcam.py)
-### Description
+#### Item Detection Script (test_without_webcam.py)
+#### Description
 This script processes an image containing multiple boxes to detect whether an item is present in each box. If an item is detected, a trained machine learning model classifies the type of item. The processed image is then saved with detected boxes highlighted.
 
-### Simple Flow of Execution
+##### Simple Flow of Execution
 ```
 1. Load the image.
 2. Convert it to grayscale and apply thresholding to identify boxes.
@@ -82,7 +83,7 @@ This script processes an image containing multiple boxes to detect whether an it
 6. Save the processed image with annotations and return results.
 ```
 
-### Step-by-Step Breakdown
+#### Step-by-Step Breakdown
 1. **Load the Image**
    - The script reads the input image using OpenCV (`cv2.imread`).
    - If the image cannot be loaded, it prints an error and exits.
@@ -115,11 +116,11 @@ This script processes an image containing multiple boxes to detect whether an it
   
 ---
 
-## Before and After Image Comparison
+### Before and After Image Comparison
 Below are sample images demonstrating the **Before and After** item detection process:
 
-### Before Detection
+#### Before Detection
 ![Before Image](AnalysisCodes/box_system/3_item.jpg)
 
-### After Detection
+#### After Detection
 ![After Image](AnalysisCodes/box_system/output_detected_boxes_with_items.jpg)
