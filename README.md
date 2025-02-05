@@ -40,7 +40,44 @@ To address these issues, we propose the development of an **automated equipment 
 - Implement data validation checks to ensure the accuracy of student and equipment information.
 
 ---
+## Basket System
+### Item Detection Model (YOLO v8 + Roboflow)
+#### Description
+This model is trained using YOLOv8 with a dataset prepared in Roboflow. It is designed for real-time object detection, drawing bounding boxes around detected items and labeling them with confidence scores. ** STRICTLY RUN IN WINDOWS ONLY **
 
+Model Details
+- Model: Trained using YOLOv8 (best.pt)
+```yolo train model=yolov8n.pt data=data.yaml epochs=100 imgsz=640```
+- Training Platform: Dataset Prepared via Roboflow
+``https://app.roboflow.com/login``
+- Inference Framework: Ultralytics YOLO
+
+---
+### Item Detection Code (detection_overlaying_items.py)
+#### Description
+This script utilizes YOLOv8 for real-time object detection using a webcam feed. It continuously captures video frames from the webcam, processes them using a trained YOLOv8 model (best.pt), and overlays bounding boxes with confidence scores and labels around detected objects.
+
+####How it works
+1. **Load YOLOv8 Model**
+   - The script loads a pre-trained YOLOv8 model from best.pt.
+2. **Open Webcam**
+   - The script accesses the first available webcam (cv2.VideoCapture(0)).
+   - If the webcam is unavailable, an error message is displayed.
+3. **Perform Real-Time Object Detection**
+   - Each frame is passed through the YOLO model for inference.
+   - Objects with confidence scores above 0.6 are considered valid detections.
+4. **Overlay Bounding Boxes & Labels**
+   - Bounding boxes are drawn around detected objects.
+   - Labels (object class names) and confidence scores are displayed above each bounding box.
+5. **Display the Detection Results**
+   - The annotated video feed is displayed using OpenCV (cv2.imshow).
+   - The script continues running until the user presses the 'q' key to exit.
+6. **Cleanup**
+   - Once the script stops, the webcam is released, and OpenCV windows are closed.
+
+####Output
+![Output](AnalysisCodes/basket_system/YOLO Object Detection_screenshot_05.02.2025.png)
+---
 ## Black Bordered Box System
 ### Item Detection Model (item_machine_learning.py)
 #### Description
