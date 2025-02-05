@@ -119,7 +119,7 @@ This script processes an image containing multiple boxes to detect whether an it
 Below are sample images demonstrating the **Before and After** item detection process:
 
 ### Before Detection
-![Before Image](AnalysisCodes/3_item.jpg)
+![Before Image](AnalysisCodes/box_system/3_item.jpg)
 
 ### After Detection
-![After Image](AnalysisCodes/output_detected_boxes_with_items.jpg)
+![After Image](AnalysisCodes/box_system/output_detected_boxes_with_items.jpg)
