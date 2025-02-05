@@ -43,7 +43,7 @@ To address these issues, we propose the development of an **automated equipment 
 ## Basket System
 ### Item Detection Model (YOLO v8 + Roboflow)
 #### Description
-This model is trained using YOLOv8 with a dataset prepared in Roboflow. It is designed for real-time object detection, drawing bounding boxes around detected items and labeling them with confidence scores. ** STRICTLY RUN IN WINDOWS ONLY **
+This model is trained using YOLOv8 with a dataset prepared in Roboflow. It is designed for real-time object detection, drawing bounding boxes around detected items and labeling them with confidence scores. **STRICTLY RUN IN WINDOWS ONLY**
 
 Model Details
 - Model: Trained using YOLOv8 (best.pt)
@@ -75,10 +75,8 @@ This script utilizes YOLOv8 for real-time object detection using a webcam feed. 
 6. **Cleanup**
    - Once the script stops, the webcam is released, and OpenCV windows are closed.
 
-#### Before Detection
-![Before Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
 #### Output
-![Output](AnalysisCodes/basket_system/YOLO Object Detection_screenshot_05.02.2025.png)
+![Before Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
 
 ---
 ## Black Bordered Box System
