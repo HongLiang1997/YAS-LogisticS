@@ -57,7 +57,7 @@ Model Details
 #### Description
 This script utilizes YOLOv8 for real-time object detection using a webcam feed. It continuously captures video frames from the webcam, processes them using a trained YOLOv8 model (best.pt), and overlays bounding boxes with confidence scores and labels around detected objects.
 
-####How it works
+#### How it works
 1. **Load YOLOv8 Model**
    - The script loads a pre-trained YOLOv8 model from best.pt.
 2. **Open Webcam**
@@ -75,7 +75,9 @@ This script utilizes YOLOv8 for real-time object detection using a webcam feed. 
 6. **Cleanup**
    - Once the script stops, the webcam is released, and OpenCV windows are closed.
 
-####Output
+#### Before Detection
+![Before Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
+#### Output
 ![Output](AnalysisCodes/basket_system/YOLO Object Detection_screenshot_05.02.2025.png)
 
 ---
