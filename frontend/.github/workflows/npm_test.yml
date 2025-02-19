@@ -25,5 +25,3 @@ jobs:
         run: npm run build
       - name: Run tests
         run: npm test
-      - name: Install @tabler/icons-react
-        run: npm install @tabler/icons-react

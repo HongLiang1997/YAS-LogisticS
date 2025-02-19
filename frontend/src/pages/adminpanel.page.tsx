@@ -1,37 +1,43 @@
-import { AppShell, Burger, Group, Skeleton } from '@mantine/core';
+import { useState } from 'react';
+import { AppShell } from '@mantine/core';
+import { AdminHeader } from '../components/nav/AdminHeader';
+import { AdminNavbar } from '../components/nav/AdminNavbar';
+import { Overview } from '../components/adminpage/Overview';
+import { EquipmentRequestForm } from '../components/adminpage/EquipmentRequestForm';
+import { BasketLogs } from '../components/adminpage/BasketLogs';
 import { useDisclosure } from '@mantine/hooks';
-import { ColorSchemeToggle } from '../components/ColorScheme/ColorSchemeToggle';
 
 export function AdminPanelPage() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+    const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+    const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+    const [activePage, setActivePage] = useState('overview');  // Default to 'overview'
 
-  return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{
-        width: 300,
-        breakpoint: 'sm',
-        collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
-      }}
-      padding="md"
-    >
-      <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-          <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
-          <ColorSchemeToggle />
-        </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md">
-        Navbar
-        {Array(15)
-          .fill(0)
-          .map((_, index) => (
-            <Skeleton key={index} h={28} mt="sm" animate={false} />
-          ))}
-      </AppShell.Navbar>
-      <AppShell.Main>Main</AppShell.Main>
-    </AppShell>
-  );
+    return (
+        <AppShell
+            header={{ height: 60 }}
+            navbar={{
+                width: 300,
+                breakpoint: 'sm',
+                collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+            }}
+            padding="md">
+
+            <AdminHeader
+                mobileOpened={mobileOpened}
+                toggleMobile={toggleMobile}
+                desktopOpened={desktopOpened}
+                toggleDesktop={toggleDesktop}
+            />
+
+            <AdminNavbar activePage={activePage} setActivePage={setActivePage} />
+
+            <AppShell.Main>
+                {activePage === 'overview'
+                    ? <Overview />
+                    : activePage === 'logs'
+                        ? <BasketLogs />
+                        : <EquipmentRequestForm />}
+            </AppShell.Main>
+        </AppShell>
+    );
 }
