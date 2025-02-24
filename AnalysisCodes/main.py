@@ -12,10 +12,10 @@ ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 # Define script paths
-RFID_SCRIPT = "rfid/rfid_scanner.py"
 CAMERA_SCRIPT = "basket_system/item_scanner.py"
 FETCH_SCRIPT = "db/fetch.py"  # Path to the script that fetches data from the database
-IR_SCRIPT = "ir_sensor/ir.py"
+IR_SCRIPT_SPECIFIC = "ir_sensor/ir_specific_check.py"
+IR_SCRIPT_ALL = "ir_sensor/ir_all_check.py"
 # Create Main App
 app = ctk.CTk()
 app.title("Return Tray Process")
@@ -28,7 +28,7 @@ steps_frame.pack(side="left", fill="y")
 # Status labels for each step (with improved styling)
 step1_label = ctk.CTkLabel(
     steps_frame, 
-    text="Step 1: RFID", 
+    text="Step 1: Tray Selection", 
     font=("Arial", 20, "bold"),  # Larger and bold font
     text_color="white",  # Text color
     corner_radius=10,  # Rounded corners for the label
@@ -125,7 +125,7 @@ right_frame = ctk.CTkFrame(app, width=800, height=800)
 right_frame.pack(side="right", fill="both", expand=True)
 
 # Status Label
-status_label = ctk.CTkLabel(right_frame, text="Place Tray on Scanner", font=("Arial", 18))
+status_label = ctk.CTkLabel(right_frame, text="Press Start Process to Begin", font=("Arial", 18))
 status_label.pack(pady=20)
 
 # Progress Bar
@@ -133,7 +133,7 @@ progress = ctk.CTkProgressBar(right_frame, width=300)
 progress.set(0)
 progress.pack(pady=10)
 # Start Button
-start_button = ctk.CTkButton(right_frame, text="Start Process", command=lambda: run_rfid_scan())
+start_button = ctk.CTkButton(right_frame, text="Start Process", command=lambda: run_bay_check_scan())
 start_button.pack(pady=20)
 
 # Reset Button (Initially Hidden)
@@ -154,29 +154,62 @@ def update_status(text, progress_value, color="white"):
     app.update()
 
 
-def run_rfid_scan():
-    """Runs the RFID scanner script and proceeds to the next step"""
-    update_step_labels(1)  
-    update_status("Scanning RFID...", 0.1, "cyan")
-    
+## Function to run the bay check scan
+def run_bay_check_scan():
+    """Runs the bay check script and updates UI with available trays."""
+    update_status("Scanning for available bays...", 0.2, "cyan")
+    start_button.pack_forget()
     def process():
-        # Run the RFID script and capture the output
-        result = subprocess.run(["python", RFID_SCRIPT], capture_output=True, text=True)
+        result = subprocess.run(["python", IR_SCRIPT_ALL], capture_output=True, text=True)
         
-        # Assuming the RFID tag is printed by the script, we capture it
-        rfid_tag = result.stdout.strip()  # Assuming the tag is printed directly
-        
-        if rfid_tag:
-            update_status("RFID Detected!", 0.2, "green")
-            # Pass the rfid_tag to run_fetch_data
-            app.after(1000, run_fetch_data, rfid_tag)  # Delay before fetching data
+        available_bays = result.stdout.strip().split(", ") if result.stdout.strip() else []
+
+        if available_bays:
+            update_status("Available bays detected!", 0.3, "green")
+            app.after(1000, lambda: generate_tray_buttons(available_bays))  # Pass available trays
         else:
-            update_status("RFID Scan Failed! Try Again.", 0.0, "red")
-    
+            update_status("No available bays found!", 0.0, "red")
+
     threading.Thread(target=process, daemon=True).start()
 
+# Frame to hold tray selection buttons
+tray_frame = ctk.CTkFrame(right_frame)
+tray_frame.pack(pady=10)
 
-def run_fetch_data(rfid_tag):
+def generate_tray_buttons(tray_list):
+    """Dynamically creates buttons for selecting available trays."""
+    for widget in tray_frame.winfo_children():
+        widget.destroy()  # Clear previous buttons
+
+    if tray_list:
+        for tray in tray_list:
+            btn = ctk.CTkButton(tray_frame, text=f"{tray}", command=lambda t=tray: on_tray_selected(t),
+            font=("Arial", 20, "bold"),
+            text_color="white",
+            corner_radius=10,
+            width=180,
+            height=50,)
+            btn.pack(pady=5)
+    else:
+        no_tray_label = ctk.CTkLabel(tray_frame, text="No available trays.", text_color="red")
+        no_tray_label.pack()
+
+selected_tray_label = ctk.CTkLabel(right_frame, text="Selected Tray: None", font=("Arial", 16))
+selected_tray_label.pack(pady=5)
+
+def on_tray_selected(tray):
+    """Updates the UI to show the selected tray and fetches data."""
+    selected_tray_label.configure(text=f"Selected Tray: {tray}", text_color="lightblue")
+
+    # Hide the tray selection frame
+    tray_frame.pack_forget()
+
+    # Proceed to fetch data for the selected tray
+    update_status(f"Fetching data for {tray}...", 0.4, "cyan")
+    run_fetch_data(tray)
+
+
+def run_fetch_data(bay_number):
     """Fetches data from the database based on the RFID tag and proceeds to the next step"""
     update_step_labels(2)  
     update_status("Fetching Data...", 0.3, "cyan")
@@ -184,7 +217,7 @@ def run_fetch_data(rfid_tag):
     def process():
         # Run the fetch data script with the rfid_tag
         result = subprocess.run(
-            ["python", FETCH_SCRIPT, rfid_tag],  # Pass RFID tag as argument
+            ["python", FETCH_SCRIPT, bay_number],  # Pass RFID tag as argument
             capture_output=True,
             text=True
         )
@@ -227,7 +260,7 @@ def run_camera_scan(fetched_data):
             print("Scan failed, retrying...")
             update_status("Scan Failed, retrying...", 0.0, "red")
             canvas.pack_forget()  # Hide it initially
-            run_rfid_scan()  # Call the RFID scanning function again (adjust this as per your logic)
+            run_bay_check_scan()  # Call the RFID scanning function again (adjust this as per your logic)
     
     threading.Thread(target=process, daemon=True).start()
 
@@ -240,7 +273,7 @@ def return_tray():
     try:
         # Simulate the process of returning the tray by calling the IR_SCRIPTS
         result = subprocess.run(
-            ["python", IR_SCRIPT],  # Replace with actual path to the script
+            ["python", IR_SCRIPT_SPECIFIC],  # Replace with actual path to the script
             capture_output=True,
             text=True
         )
