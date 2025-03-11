@@ -5,7 +5,15 @@ import cv2
 import numpy as np
 from PIL import Image, ImageTk
 import json  # Assuming the database returns JSON formatted data
-import time 
+from beacon import triangulate  # Import the Bluetooth scanning function
+
+# Thread for running Bluetooth scan
+def run_bluetooth_thread():
+    triangulate.start_bluetooth_scanning()  # Start Bluetooth scanning in the background
+
+# Create and start a thread for Bluetooth scanning
+bluetooth_thread = threading.Thread(target=run_bluetooth_thread, daemon=True)
+bluetooth_thread.start()
 
 # Set UI Theme
 ctk.set_appearance_mode("dark")
@@ -16,6 +24,9 @@ CAMERA_SCRIPT = "basket_system/item_scanner.py"
 FETCH_SCRIPT = "db/fetch.py"  # Path to the script that fetches data from the database
 IR_SCRIPT_SPECIFIC = "ir_sensor/ir_specific_check.py"
 IR_SCRIPT_ALL = "ir_sensor/ir_all_check.py"
+BLUETOOTH_SCRIPT = "beacon/triangulate.py"
+PYTHON_EXEC = "/home/yasuser/project/yas/bin/python3"  # Use the correct Python
+
 # Create Main App
 app = ctk.CTk()
 app.title("Return Tray Process")
@@ -146,6 +157,10 @@ canvas = ctk.CTkCanvas(right_frame, width=640, height=480)
 canvas.pack(pady=10)
 canvas.pack_forget()  # Hide it initially
 
+import subprocess
+import threading
+import time
+
 
 def update_status(text, progress_value, color="white"):
     """Updates the UI status label, progress bar, and color"""
@@ -160,7 +175,7 @@ def run_bay_check_scan():
     update_status("Scanning for available bays...", 0.2, "cyan")
     start_button.pack_forget()
     def process():
-        result = subprocess.run(["python", IR_SCRIPT_ALL], capture_output=True, text=True)
+        result = subprocess.run([PYTHON_EXEC, IR_SCRIPT_ALL], capture_output=True, text=True)
         
         available_bays = result.stdout.strip().split(", ") if result.stdout.strip() else []
 
@@ -217,7 +232,7 @@ def run_fetch_data(bay_number):
     def process():
         # Run the fetch data script with the rfid_tag
         result = subprocess.run(
-            ["python", FETCH_SCRIPT, bay_number],  # Pass RFID tag as argument
+            [PYTHON_EXEC, FETCH_SCRIPT, bay_number],  # Pass RFID tag as argument
             capture_output=True,
             text=True
         )
@@ -273,7 +288,7 @@ def return_tray():
     try:
         # Simulate the process of returning the tray by calling the IR_SCRIPTS
         result = subprocess.run(
-            ["python", IR_SCRIPT_SPECIFIC],  # Replace with actual path to the script
+            [PYTHON_EXEC, IR_SCRIPT_SPECIFIC],  # Replace with actual path to the script
             capture_output=True,
             text=True
         )
@@ -288,8 +303,6 @@ def return_tray():
     except Exception as e:
         update_status(f"Error: {str(e)}", 0.0, "red")
 
-
-    
         
 def complete():
     """Complete function that concludes the process and lets the user return to RFID scan."""
