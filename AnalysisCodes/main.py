@@ -5,17 +5,43 @@ import cv2
 import numpy as np
 from PIL import Image, ImageTk
 import json  # Assuming the database returns JSON formatted data
-import time 
+from beacon import triangulate  # Import the Bluetooth scanning function
+from ultrasonic_sensor import ultrasonic
+import subprocess
+import threading
+import time
+from ultrasonic_sensor.ultrasonic import scanned_items
+
+# Thread for running Bluetooth scan
+def run_bluetooth_thread():
+    triangulate.start_bluetooth_scanning()  # Start Bluetooth scanning in the background
+
+# Create and start a thread for Bluetooth scanning
+bluetooth_thread = threading.Thread(target=run_bluetooth_thread, daemon=True)
+bluetooth_thread.start()
+
+
+# Thread for running Bluetooth scan
+def run_ultrasonic_thread():
+    ultrasonic.measure_distances()  # Start Bluetooth scanning in the background
+
+ultrasonic_thread = threading.Thread(target=run_ultrasonic_thread, daemon=True)
+ultrasonic_thread.start()
 
 # Set UI Theme
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
+
 # Define script paths
 CAMERA_SCRIPT = "basket_system/item_scanner.py"
-FETCH_SCRIPT = "db/fetch.py"  # Path to the script that fetches data from the database
-IR_SCRIPT_SPECIFIC = "ir_sensor/ir_specific_check.py"
-IR_SCRIPT_ALL = "ir_sensor/ir_all_check.py"
+FETCH_ITEMS_SCRIPT = "db/fetch_db_items.py"  # Path to the script that fetches data from the database
+FETCH_STATUS_SCRIPT = "db/fetch_db_status.py"  # Path to the script that fetches data from the database
+UPDATE_STATUS_SCRIPT = "db/update_db_status.py"  # Path to the script that fetches data from the database
+
+BLUETOOTH_SCRIPT = "beacon/triangulate.py"
+PYTHON_EXEC = "/home/yasuser/project/yas/bin/python3"  # Use the correct Python
+
 # Create Main App
 app = ctk.CTk()
 app.title("Return Tray Process")
@@ -133,11 +159,21 @@ progress = ctk.CTkProgressBar(right_frame, width=300)
 progress.set(0)
 progress.pack(pady=10)
 # Start Button
-start_button = ctk.CTkButton(right_frame, text="Start Process", command=lambda: run_bay_check_scan())
+start_button = ctk.CTkButton(right_frame, text="Start Process", command=lambda: run_bay_check_scan(), font=("Arial", 20, "bold"),
+            text_color="white",
+            corner_radius=10,
+            width=180,
+            height=50,)
+
 start_button.pack(pady=20)
 
 # Reset Button (Initially Hidden)
-reset_button = ctk.CTkButton(right_frame, text="Reset Process", command=lambda: reset_ui())
+reset_button = ctk.CTkButton(right_frame, text="Reset Process", command=lambda: reset_ui(), font=("Arial", 20, "bold"),
+            text_color="white",
+            corner_radius=10,
+            width=180,
+            height=50,)
+
 reset_button.pack(pady=20)
 reset_button.pack_forget()
 
@@ -146,6 +182,8 @@ canvas = ctk.CTkCanvas(right_frame, width=640, height=480)
 canvas.pack(pady=10)
 canvas.pack_forget()  # Hide it initially
 
+# Store fetched item data
+scanned_items = []
 
 def update_status(text, progress_value, color="white"):
     """Updates the UI status label, progress bar, and color"""
@@ -153,14 +191,13 @@ def update_status(text, progress_value, color="white"):
     progress.set(progress_value)
     app.update()
 
-
 ## Function to run the bay check scan
 def run_bay_check_scan():
     """Runs the bay check script and updates UI with available trays."""
     update_status("Scanning for available bays...", 0.2, "cyan")
     start_button.pack_forget()
     def process():
-        result = subprocess.run(["python", IR_SCRIPT_ALL], capture_output=True, text=True)
+        result = subprocess.run([PYTHON_EXEC, FETCH_STATUS_SCRIPT], capture_output=True, text=True)
         
         available_bays = result.stdout.strip().split(", ") if result.stdout.strip() else []
 
@@ -209,34 +246,38 @@ def on_tray_selected(tray):
     run_fetch_data(tray)
 
 
-def run_fetch_data(bay_number):
-    """Fetches data from the database based on the RFID tag and proceeds to the next step"""
-    update_step_labels(2)  
+def run_fetch_data(tray_number):
+    """Fetches data from the database based on the RFID tag and proceeds to the next step."""
+    update_step_labels(2)
     update_status("Fetching Data...", 0.3, "cyan")
-    
+
     def process():
-        # Run the fetch data script with the rfid_tag
+        # Run the fetch data script with the tray number
         result = subprocess.run(
-            ["python", FETCH_SCRIPT, bay_number],  # Pass RFID tag as argument
+            [PYTHON_EXEC, FETCH_ITEMS_SCRIPT, tray_number],  # Pass tray number as argument
             capture_output=True,
             text=True
         )
-        
+
         try:
             fetched_data = json.loads(result.stdout)  # Assuming the output is JSON data
-            
             if fetched_data:
                 update_status("Data Fetched!", 0.4, "green")
-                app.after(1000, run_camera_scan, fetched_data)  # Pass fetched data to the camera scan
+                
+                # Initialize the list of items for this tray if not present
+                if tray_number not in scanned_items:
+                    ultrasonic.scanned_items[tray_number] = []  # Create a new empty list for this tray
+                
+                app.after(1000, run_camera_scan, tray_number, fetched_data)  # Pass tray number and fetched data to the camera scan
             else:
                 update_status("No Data Found! Try Again.", 0.0, "red")
         except json.JSONDecodeError:
             update_status("Error Fetching Data. Try Again.", 0.0, "red")
-    
+
     threading.Thread(target=process, daemon=True).start()
 
 
-def run_camera_scan(fetched_data):
+def run_camera_scan(tray_number, fetched_data):
     """Runs the camera scanner script with the fetched data"""
     update_step_labels(3)  
     update_status("Booting Up Camera...", 0.5, "cyan")
@@ -254,6 +295,16 @@ def run_camera_scan(fetched_data):
         if scan_result:
             print("Scan successful.")
             update_status("Scan successful, proceeding to Return Tray.", 0.75, "green")
+            
+            # Append the scanned items to the correct tray in scanned_items
+            if tray_number in scanned_items:
+                ultrasonic.scanned_items[tray_number].extend(fetched_data)  # Add the scanned items to the tray's list
+            else:
+                ultrasonic.scanned_items[tray_number] = fetched_data  # If tray doesn't exist, create it and set the items
+
+            # Print the updated scanned_items for debugging
+            print(f"Updated Scanned Items: {scanned_items}")
+
             canvas.pack_forget()  # Hide it initially            
             return_tray()  # You can modify this part as per your logic
         else:
@@ -264,33 +315,50 @@ def run_camera_scan(fetched_data):
     
     threading.Thread(target=process, daemon=True).start()
 
+
 def return_tray():
-    """Simulate returning the tray (IR_SCRIPTS)."""
+    """Instruct the user to return the tray and press 'Tray Returned'."""
+    
+    # Update step labels and status
     update_step_labels(4)  
+    update_status("Please return the tray to any bay.", 0.8, "green")
 
-    update_status("Returning Tray...", 0.85, "blue")
-    
-    try:
-        # Simulate the process of returning the tray by calling the IR_SCRIPTS
-        result = subprocess.run(
-            ["python", IR_SCRIPT_SPECIFIC],  # Replace with actual path to the script
-            capture_output=True,
-            text=True
-        )
-        
-        # Check if the script ran successfully
-        if result.returncode == 0:
-            update_status("Tray Returned Successfully!", 0.9, "green")
-            complete()
-        else:
-            update_status("Error in Returning Tray.", 0.0, "red")
-    
-    except Exception as e:
-        update_status(f"Error: {str(e)}", 0.0, "red")
+    # Create a status label for tray instructions
+    status_label = ctk.CTkLabel(right_frame, text="Please return the tray to any bay.", font=("Arial", 20, "bold"),
+            text_color="white",
+            corner_radius=10,
+            width=180,
+            height=50,)
+    status_label.pack(pady=20)
 
+    # Function to handle when the button is pressed
+    def on_tray_returned():
+        """Handle the tray return button click."""
+        print("Tray returned button pressed")
+        status_label.pack_forget()
+        # Hide the button after it's pressed
+        try:
+            return_button.pack_forget()  
+            print("Return button hidden.")
+        except Exception as e:
+            print(f"Error hiding button: {e}")
 
+        # Finalize the process
+        try:
+            complete()  # Ensure complete() is called
+            print("Calling complete() function.")
+        except Exception as e:
+            print(f"Error calling complete: {e}")
+
+    # Tray Returned Button
+    return_button = ctk.CTkButton(right_frame, text="Tray Returned", command=on_tray_returned,font=("Arial", 20, "bold"),
+            text_color="white",
+            corner_radius=10,
+            width=180,
+            height=50,)
     
-        
+    return_button.pack(pady=20)
+
 def complete():
     """Complete function that concludes the process and lets the user return to RFID scan."""
     update_step_labels(5)  # Mark the final step as complete.
@@ -310,6 +378,8 @@ def reset_ui():
     reset_button.pack_forget()
     start_button.pack(pady=20)
     update_status("Place Tray on Scanner", 0.0, "white")
+  
+    selected_tray_label.configure(text="Selected Tray: None")
     step1_label.configure(text="Step 1: RFID", text_color="white")
     step2_label.configure(text="Step 2: Fetch Data", text_color="white")
     step3_label.configure(text="Step 3: Scan Item", text_color="white")
