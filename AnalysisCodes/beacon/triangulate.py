@@ -24,9 +24,24 @@ class ScanDelegate(DefaultDelegate):
         DefaultDelegate.__init__(self)
 
 def get_distance(rssi, tx_power=TX_Power, n=ENV_Factor):
-    """Calculate distance from RSSI"""
-    distance = 10 ** ((tx_power - rssi) / (10 * n))
-    return min(distance, 20)  # Cap at 20m to prevent overflow
+    """Calculate distance from RSSI, retry if division by zero occurs"""
+    while True:
+        try:
+            # Calculate distance from RSSI
+            distance = 10 ** ((tx_power - rssi) / (10 * n))
+            
+            # Cap at 20m to prevent overflow
+            return min(distance, 20)
+        
+        except ZeroDivisionError:
+            # Handle division by zero error
+            print("Error: Division by zero encountered. Retrying...")
+            continue  # Continue the loop and retry the calculation
+        
+        except Exception as e:
+            # Catch other potential errors and exit the loop or return None
+            print(f"Unexpected error: {e}")
+            return None  # Return None or handle as needed
 
 def scan_beacon(scan_time=10):
     """Scan for Bluetooth devices and get their distances"""
