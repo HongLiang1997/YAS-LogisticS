@@ -1,23 +1,23 @@
-package sg.edu.singaporetech.yaswebapi.converter;
+package sg.edu.singaporetech.yaswebapi.converters;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import sg.edu.singaporetech.yaswebapi.enums.ClassroomStatus;
+import sg.edu.singaporetech.yaswebapi.enums.TrayStatus;
 
 @Converter
-public class ClassroomStatusConverter implements AttributeConverter<ClassroomStatus, String> {
+public class TrayStatusConverter implements AttributeConverter<TrayStatus, String> {
 
     @Override
-    public String convertToDatabaseColumn(ClassroomStatus attribute) {
+    public String convertToDatabaseColumn(TrayStatus attribute) {
         return attribute != null ? attribute.toString() : null;
     }
 
     @Override
-    public ClassroomStatus convertToEntityAttribute(String dbData) {
+    public TrayStatus convertToEntityAttribute(String dbData) {
         if (dbData == null) {
             return null;
         }
-        for (ClassroomStatus status : ClassroomStatus.values()) {
+        for (TrayStatus status : TrayStatus.values()) {
             if (status.toString().equals(dbData)) {
                 return status;
             }

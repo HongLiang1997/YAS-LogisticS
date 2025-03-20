@@ -3,7 +3,7 @@ package sg.edu.singaporetech.yaswebapi.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import sg.edu.singaporetech.yaswebapi.converter.TrayStatusConverter;
+import sg.edu.singaporetech.yaswebapi.converters.TrayStatusConverter;
 import sg.edu.singaporetech.yaswebapi.enums.TrayStatus;
 
 import java.util.List;
