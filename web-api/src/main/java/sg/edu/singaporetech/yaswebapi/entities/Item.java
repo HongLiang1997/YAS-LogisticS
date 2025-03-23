@@ -20,6 +20,6 @@ public class Item {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tray_id")
+    @JoinColumn(name = "tray_id", nullable = false)
     private Tray tray;
 }
