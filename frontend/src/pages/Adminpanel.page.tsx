@@ -7,7 +7,7 @@ import { EquipmentRequestForm } from '../components/adminpage/EquipmentRequestFo
 import { BasketLogs } from '../components/adminpage/BasketLogs';
 import { useDisclosure } from '@mantine/hooks';
 
-export function AdminPanelPage() {
+export function AdminpanelPage() {
     const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
     const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
     const [activePage, setActivePage] = useState('overview');  // Default to 'overview'

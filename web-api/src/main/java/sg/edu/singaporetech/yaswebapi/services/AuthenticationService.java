@@ -62,4 +62,14 @@ public class AuthenticationService {
         AccountSession savedSession = accountSessionRepository.save(accountSession);
         return savedSession.getId();
     }
+
+    public boolean isValidSession(UUID sessionId) {
+        Optional<AccountSession> result = accountSessionRepository.findById(sessionId);
+        if (result.isEmpty()) {
+            return false;
+        }
+
+        LocalDateTime expireAt = result.get().getExpire_at();
+        return LocalDateTime.now().isBefore(expireAt);
+    }
 }

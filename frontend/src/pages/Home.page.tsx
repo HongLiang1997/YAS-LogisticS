@@ -15,7 +15,7 @@ import classes from '../components/css/AuthenticationTitle.module.css';
 import { ColorSchemeScript } from '@mantine/core';
 
 export function HomePage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -27,7 +27,7 @@ export function HomePage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: username, password }),
       });
 
       if (!response.ok) {
@@ -57,11 +57,11 @@ export function HomePage() {
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
         <TextInput
-          label="Email"
-          placeholder="you@mantine.dev"
+          label="Username"
+          placeholder="you"
           required
-          value={email}
-          onChange={(event) => setEmail(event.currentTarget.value)}
+          value={username}
+          onChange={(event) => setUsername(event.currentTarget.value)}
         />
         <PasswordInput
           label="Password"

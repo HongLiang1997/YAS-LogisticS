@@ -16,9 +16,6 @@ public class Tray {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 255)
-    private String trayName;
-
     @Convert(converter = TrayStatusConverter.class)
     @Column(nullable = false, length = 20)
     private TrayStatus status;

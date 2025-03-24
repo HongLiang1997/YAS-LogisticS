@@ -65,6 +65,50 @@ const classrooms: Classroom[] = [
     },
 ];
 
+
+const temp = [
+    {
+        name: 'E6-05-01',
+        status: 'Closed',
+        bays: [
+            { id: '01', tray: null },
+            { id: '02', tray: {
+                id: '01',
+                items: [
+                    {id: '01', name: "xyz" },
+                ]
+            } },
+        ],
+    },
+    {
+        name: 'E6-07-01',
+        status: 'Closed',
+        bays: [
+            { id: '01', tray: null },
+            { id: '02', tray: {
+                    id: '01',
+                    items: [
+                        {id: '02', name: "efg" },
+                    ]
+                } },
+        ],
+    },
+    {
+        name: 'E6-05-02',
+        status: 'Closed',
+        bays: [
+            { id: '01', tray: null },
+            { id: '02', tray: {
+                    id: '01',
+                    items: [
+                        {id: '01', name: "xyz" },
+                        {id: '03', name: "abc" },
+                    ]
+                } },
+        ],
+    },
+];
+
 // Function to simulate assigning items to trays (0 or 1 of each item per tray)
 function assignItemsToTrays(): void {
     classrooms.forEach(classroom => {
