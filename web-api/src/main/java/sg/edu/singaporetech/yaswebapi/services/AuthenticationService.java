@@ -1,6 +1,7 @@
 package sg.edu.singaporetech.yaswebapi.services;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sg.edu.singaporetech.yaswebapi.components.PasswordMatcher;
 import sg.edu.singaporetech.yaswebapi.entities.Account;
 import sg.edu.singaporetech.yaswebapi.entities.AccountSession;
@@ -34,6 +35,7 @@ public class AuthenticationService {
      * @param password
      * @return Empty optional if bad username or password; Session Token otherwise
      */
+    @Transactional
     public Optional<UUID> authenticate(
             String username,
             String password
@@ -63,6 +65,7 @@ public class AuthenticationService {
         return savedSession.getId();
     }
 
+    @Transactional(readOnly = true)
     public boolean isValidSession(UUID sessionId) {
         Optional<AccountSession> result = accountSessionRepository.findById(sessionId);
         if (result.isEmpty()) {
