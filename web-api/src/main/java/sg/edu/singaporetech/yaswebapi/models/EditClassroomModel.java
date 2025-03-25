@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class EditClassroomModel {
     @NonNull
-    private String id;
+    private Long id;
 
     @NonNull
     private String name;

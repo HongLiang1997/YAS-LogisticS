@@ -15,6 +15,7 @@ import sg.edu.singaporetech.yaswebapi.services.EditClassroomService;
 import sg.edu.singaporetech.yaswebapi.services.EditTrayService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -71,14 +72,10 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
         }
 
-        Long trayID = Long.getLong(editTrayModel.getId());
-        if (trayID == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
-        }
-
-        return ResponseEntity.ok(editTrayService.updateTray(trayID, editTrayModel.getItemNames()));
+        return ResponseEntity.ok(editTrayService.updateTray(editTrayModel.getId(), editTrayModel.getItemNames()));
     }
 
+    @PostMapping("/edit/classroom")
     public ResponseEntity<Boolean> editClassroom(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @RequestBody EditClassroomModel editClassroomModel
@@ -96,11 +93,6 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
         }
 
-        Long classroomID = Long.getLong(editClassroomModel.getId());
-        if (classroomID == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
-        }
-
         ClassroomStatus classroomStatus;
         try {
             classroomStatus = ClassroomStatus.valueOf(editClassroomModel.getStatus());
@@ -108,6 +100,79 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(false);
         }
 
-        return ResponseEntity.ok(editClassroomService.updateClassroom(classroomID, editClassroomModel.getName(), classroomStatus));
+        return ResponseEntity.ok(editClassroomService.updateClassroom(editClassroomModel.getId(), editClassroomModel.getName(), classroomStatus));
+    }
+
+    @DeleteMapping("/classroom/{classroomID}")
+    public ResponseEntity<Boolean> deleteClassroom(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @PathVariable Long classroomID
+    ) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        String token = authorizationHeader.substring(7);
+        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        editClassroomService.deleteClassroom(classroomID);
+        return ResponseEntity.ok(true);
+    }
+
+    @DeleteMapping("/tray/{trayID}")
+    public ResponseEntity<Boolean> deleteTray(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @PathVariable Long trayID
+    ) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        String token = authorizationHeader.substring(7);
+        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        }
+
+        return ResponseEntity.ok(editTrayService.deleteTray(trayID));
+    }
+
+    @PostMapping("/tray/create")
+    public ResponseEntity<Long> createTray(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestBody Long classroomID
+    ) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        String token = authorizationHeader.substring(7);
+        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Optional<Long> result = editTrayService.createTray(classroomID);
+        return result
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
+    }
+
+    @PostMapping("/classroom/create")
+    public ResponseEntity<Long> createClassroom(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+            @RequestBody String classroomName
+    ) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        String token = authorizationHeader.substring(7);
+        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Long newClassroomID = editClassroomService.createClassroom(classroomName);
+        return ResponseEntity.ok(newClassroomID);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 public class EditTrayModel {
     @NonNull
-    private String id;
+    private Long id;
 
     @NonNull
     private List<String> itemNames;

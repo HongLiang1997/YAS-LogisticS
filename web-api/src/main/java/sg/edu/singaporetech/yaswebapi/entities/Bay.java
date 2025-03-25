@@ -12,7 +12,7 @@ public class Bay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "bay", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    @OneToOne(mappedBy = "bay", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true, orphanRemoval = false)
     private Tray tray;
 
     @ManyToOne(fetch = FetchType.LAZY)
