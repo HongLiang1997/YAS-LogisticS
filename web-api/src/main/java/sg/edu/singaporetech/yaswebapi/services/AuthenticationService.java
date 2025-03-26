@@ -1,5 +1,8 @@
 package sg.edu.singaporetech.yaswebapi.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sg.edu.singaporetech.yaswebapi.components.PasswordMatcher;
@@ -14,19 +17,33 @@ import java.util.UUID;
 
 @Service
 public class AuthenticationService {
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     private final PasswordMatcher passwordMatcher;
     private final AccountRepository accountRepository;
     private final AccountSessionRepository accountSessionRepository;
 
+    private final String edgeApiKey;
+
     public AuthenticationService(
             PasswordMatcher passwordMatcher,
             AccountRepository accountRepository,
-            AccountSessionRepository accountSessionRepository
+            AccountSessionRepository accountSessionRepository,
+            @Value("${EDGE_API_KEY}") String edgeApiKey
     ) {
         this.passwordMatcher = passwordMatcher;
         this.accountRepository = accountRepository;
         this.accountSessionRepository = accountSessionRepository;
+        this.edgeApiKey = edgeApiKey;
+    }
+
+    public boolean isValidApiKey(String apiKey) {
+        if (edgeApiKey == null || edgeApiKey.isEmpty()) {
+            logger.error("Edge API key is not set in application properties!");
+            return false;
+        }
+
+        return apiKey.equals(edgeApiKey);
     }
 
     /**

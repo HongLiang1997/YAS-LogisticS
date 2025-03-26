@@ -40,13 +40,8 @@ public class AdminController {
 
     @GetMapping("/classroom")
     public ResponseEntity<ClassroomLogisticResponse> getClassroomLogistics(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ClassroomLogisticResponse(false, null));
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ClassroomLogisticResponse(false, null));
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         List<ClassroomDTO> classroomsData = classroomLogisticService.getAllClassrooms();
@@ -54,18 +49,13 @@ public class AdminController {
         return ResponseEntity.ok(new ClassroomLogisticResponse(true, classroomsData));
     }
 
-    @PostMapping("/edit/tray")
+    @PutMapping("/edit/tray")
     public ResponseEntity<Boolean> editTray(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @RequestBody EditTrayModel editTrayModel
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         if (editTrayModel.getItemNames().isEmpty()) {
@@ -75,18 +65,13 @@ public class AdminController {
         return ResponseEntity.ok(editTrayService.updateTray(editTrayModel.getId(), editTrayModel.getItemNames()));
     }
 
-    @PostMapping("/edit/classroom")
+    @PutMapping("/edit/classroom")
     public ResponseEntity<Boolean> editClassroom(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @RequestBody EditClassroomModel editClassroomModel
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         if (editClassroomModel.getName().isBlank()) {
@@ -108,13 +93,8 @@ public class AdminController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @PathVariable Long classroomID
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         editClassroomService.deleteClassroom(classroomID);
@@ -126,13 +106,8 @@ public class AdminController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @PathVariable Long trayID
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         return ResponseEntity.ok(editTrayService.deleteTray(trayID));
@@ -143,12 +118,7 @@ public class AdminController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @RequestBody Long classroomID
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+        if (!isValidAuthHeader(authorizationHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
@@ -163,16 +133,20 @@ public class AdminController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
             @RequestBody String classroomName
     ) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-
-        String token = authorizationHeader.substring(7);
-        if (!authenticationService.isValidSession(UUID.fromString(token))) {
+        if (!isValidAuthHeader(authorizationHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
         Long newClassroomID = editClassroomService.createClassroom(classroomName);
         return ResponseEntity.ok(newClassroomID);
+    }
+
+    private Boolean isValidAuthHeader(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return false;
+        }
+
+        String token = authorizationHeader.substring(7);
+        return authenticationService.isValidSession(UUID.fromString(token));
     }
 }
