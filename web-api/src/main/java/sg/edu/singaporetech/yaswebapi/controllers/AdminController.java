@@ -5,14 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sg.edu.singaporetech.yaswebapi.dto.ClassroomDTO;
+import sg.edu.singaporetech.yaswebapi.dto.LoanLogDTO;
 import sg.edu.singaporetech.yaswebapi.enums.ClassroomStatus;
 import sg.edu.singaporetech.yaswebapi.models.EditClassroomModel;
 import sg.edu.singaporetech.yaswebapi.models.EditTrayModel;
 import sg.edu.singaporetech.yaswebapi.responses.ClassroomLogisticResponse;
-import sg.edu.singaporetech.yaswebapi.services.AuthenticationService;
-import sg.edu.singaporetech.yaswebapi.services.ClassroomLogisticService;
-import sg.edu.singaporetech.yaswebapi.services.EditClassroomService;
-import sg.edu.singaporetech.yaswebapi.services.EditTrayService;
+import sg.edu.singaporetech.yaswebapi.services.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,16 +24,19 @@ public class AdminController {
     private final ClassroomLogisticService classroomLogisticService;
     private final EditTrayService editTrayService;
     private final EditClassroomService editClassroomService;
+    private final StatisticService statisticService;
 
     public AdminController(AuthenticationService authenticationService,
                            ClassroomLogisticService classroomLogisticService,
                            EditTrayService editTrayService,
-                           EditClassroomService editClassroomService
+                           EditClassroomService editClassroomService,
+                           StatisticService statisticService
     ) {
         this.authenticationService = authenticationService;
         this.classroomLogisticService = classroomLogisticService;
         this.editTrayService = editTrayService;
         this.editClassroomService = editClassroomService;
+        this.statisticService = statisticService;
     }
 
     @GetMapping("/classroom")
@@ -140,6 +141,27 @@ public class AdminController {
         Long newClassroomID = editClassroomService.createClassroom(classroomName);
         return ResponseEntity.ok(newClassroomID);
     }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<List<LoanLogDTO>> getLoanLogs(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<LoanLogDTO> loanLogs = statisticService.getLatestLoanLogs(100);
+        return ResponseEntity.ok(loanLogs);
+    }
+
+    @GetMapping("/classroom/statistics/{classroomName}")
+    public ResponseEntity<List<LoanLogDTO>> getLoanLogsByClassroom(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader, @PathVariable String classroomName) {
+        if (!isValidAuthHeader(authorizationHeader)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        List<LoanLogDTO> loanLogs = statisticService.getLatestLoanLogsByClassroom(classroomName, 100);
+        return ResponseEntity.ok(loanLogs);
+    }
+
 
     private Boolean isValidAuthHeader(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
