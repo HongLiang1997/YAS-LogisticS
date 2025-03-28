@@ -1,16 +1,23 @@
-import Cookies from 'js-cookie';
-import { API_URL } from '@/consts';
+import {API_URL} from "@/consts";
+import Cookies from "js-cookie";
 
-export default async function deleteBayService(bayID: number): Promise<boolean> {
-  const targetURL = `${API_URL}/api/admin/tray/${bayID}`;
+export default async function editTrayService(
+  bayID: number,
+  itemNames: string[]
+): Promise<boolean> {
+  const targetURL = `${API_URL}/api/admin/edit/tray`;
   const sessionToken = Cookies.get('token')!;
 
   try {
     const response = await fetch(targetURL, {
-      method: 'DELETE',
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${sessionToken}`,
       },
+      body: JSON.stringify({
+        id: bayID,
+        itemNames
+      })
     });
 
     if (response.status === 401) {

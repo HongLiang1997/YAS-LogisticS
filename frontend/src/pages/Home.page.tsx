@@ -32,7 +32,7 @@ export function HomePage() {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    setError(''); // Clear previous errors
+    setError('');
     try {
       const loginURL = `${API_URL}/api/account/login`;
       const response = await fetch(loginURL, {

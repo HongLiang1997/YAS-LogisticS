@@ -1,17 +1,17 @@
-import {useDisclosure} from "@mantine/hooks";
 import {useEffect, useState} from "react";
-import redirectIfFailAuth from "@/utils/redirectIfFailAuth";
-import {AppShell} from "@mantine/core";
-import {AdminHeader} from "@/components/nav/AdminHeader";
-import {AdminNavbar} from "@/components/nav/AdminNavbar";
-import {Overview} from "@/components/adminpage/Overview";
-import {BasketLogs} from "@/components/adminpage/BasketLogs";
-import {EquipmentRequestForm} from "@/components/adminpage/EquipmentRequestForm";
-import getClassroomsService from "@/services/getClassroomsService";
-import {notifications} from "@mantine/notifications";
-import redirectWithDelay from "@/utils/redirectWithDelay";
-import Classroom from "@/models/classroom";
+import {AppShell, Divider, Text} from "@mantine/core";
+import {useDisclosure} from "@mantine/hooks";
+import {notifications} from '@mantine/notifications';
 import LoadingView from "@/components/LoadingView";
+import {AdminHeader} from "@/components/nav/AdminHeader";
+import Classroom from "@/models/classroom";
+import getClassroomsService from "@/services/getClassroomsService";
+import redirectIfFailAuth from "@/utils/redirectIfFailAuth";
+import redirectWithDelay from "@/utils/redirectWithDelay";
+import {BayViews} from "@/components/ClassroomPanelPage/BaysView";
+import {ClassroomStatus} from "@/enums/ClassroomStatus";
+import {TraysView} from "@/components/ClassroomPanelPage/TraysView";
+
 
 export function ClassroomPanelPage() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -87,6 +87,19 @@ export function ClassroomPanelPage() {
           /* Still loading classroom */
           classroom === undefined &&
           <LoadingView skeletonCount={15}/>
+        }
+
+        {
+          classroom !== undefined &&
+          <>
+            <Text fw={700} size="xl">Bays</Text>
+            <BayViews bays={classroom.bays} classroomIsClosed={classroom.ClassroomStatus === ClassroomStatus.CLOSED}/>
+
+            <Divider my="md" />
+
+            <Text fw={700} size="xl">Trays</Text>
+            <TraysView trays={classroom.trays} classroomIsClosed={classroom.ClassroomStatus === ClassroomStatus.CLOSED}/>
+          </>
         }
 
       </AppShell.Main>
