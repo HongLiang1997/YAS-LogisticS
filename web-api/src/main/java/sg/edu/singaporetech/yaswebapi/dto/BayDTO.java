@@ -1,15 +1,20 @@
 package sg.edu.singaporetech.yaswebapi.dto;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
 @Setter
 public class BayDTO {
-    private String id;
+    @NonNull
+    private Long id;
     private TrayDTO tray;
 
-    public BayDTO(String id, TrayDTO tray) {
+    public BayDTO(
+            @NonNull Long id,
+            TrayDTO tray
+    ) {
         this.id = id;
         this.tray = tray;
     }

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import sg.edu.singaporetech.yaswebapi.dto.ClassroomDTO;
 import sg.edu.singaporetech.yaswebapi.dto.LoanLogDTO;
 import sg.edu.singaporetech.yaswebapi.enums.ClassroomStatus;
+import sg.edu.singaporetech.yaswebapi.models.CreateClassroomModel;
+import sg.edu.singaporetech.yaswebapi.models.CreateTrayModel;
 import sg.edu.singaporetech.yaswebapi.models.EditClassroomModel;
 import sg.edu.singaporetech.yaswebapi.models.EditTrayModel;
 import sg.edu.singaporetech.yaswebapi.responses.ClassroomLogisticResponse;
@@ -117,13 +119,13 @@ public class AdminController {
     @PostMapping("/tray/create")
     public ResponseEntity<Long> createTray(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-            @RequestBody Long classroomID
+            @RequestBody CreateTrayModel createTrayModel
     ) {
         if (!isValidAuthHeader(authorizationHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        Optional<Long> result = editTrayService.createTray(classroomID);
+        Optional<Long> result = editTrayService.createTray(createTrayModel.getClassroomID());
         return result
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
@@ -132,13 +134,13 @@ public class AdminController {
     @PostMapping("/classroom/create")
     public ResponseEntity<Long> createClassroom(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-            @RequestBody String classroomName
+            @RequestBody CreateClassroomModel createClassroomModel
     ) {
         if (!isValidAuthHeader(authorizationHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        Long newClassroomID = editClassroomService.createClassroom(classroomName);
+        Long newClassroomID = editClassroomService.createClassroom(createClassroomModel.getName());
         return ResponseEntity.ok(newClassroomID);
     }
 

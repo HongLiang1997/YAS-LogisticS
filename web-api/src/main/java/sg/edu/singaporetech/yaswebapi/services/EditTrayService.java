@@ -57,7 +57,7 @@ public class EditTrayService {
     public Optional<Long> createTray(Long classroomID) {
         Optional<Classroom> result = classroomRepository.findById(classroomID);
         if (result.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
 
         Classroom classroom = result.get();
@@ -69,10 +69,11 @@ public class EditTrayService {
         Tray tray = new Tray();
         tray.setBay(bay);
         tray.setStatus(TrayStatus.IN_BAY);
+        tray.setClassroom(classroom);
         bay.setTray(tray);
 
-        classroomRepository.save(classroom);
-        return Optional.of(tray.getId());
+        Tray savedTray = trayRepository.save(tray);
+        return Optional.of(savedTray.getId());
     }
 
     @Transactional

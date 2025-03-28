@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sg.edu.singaporetech.yaswebapi.models.LoanTrayModel;
 import sg.edu.singaporetech.yaswebapi.models.ReturnTrayModel;
 import sg.edu.singaporetech.yaswebapi.services.AuthenticationService;
 import sg.edu.singaporetech.yaswebapi.services.BayService;
@@ -36,13 +37,13 @@ public class EdgeController {
     @PutMapping("/tray/loan")
     public ResponseEntity<Boolean> loanTray(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-            @RequestBody Long bayID
+            @RequestBody LoanTrayModel loanTrayModel
     ) {
         if (!isValidAuthHeader(authorizationHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        boolean result = bayService.takeTrayOut(bayID);
+        boolean result = bayService.takeTrayOut(loanTrayModel.getId());
         return ResponseEntity.ok(result);
     }
 

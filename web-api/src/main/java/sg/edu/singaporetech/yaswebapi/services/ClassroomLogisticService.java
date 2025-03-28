@@ -30,17 +30,23 @@ public class ClassroomLogisticService {
 
     private ClassroomDTO mapToDTO(Classroom classroom) {
         List<BayDTO> bayDTOs = classroom.getBays().stream()
-                .map(bay -> new BayDTO(bay.getId().toString(), bay.getTray() != null ? mapToDTO(bay.getTray()) : null))
+                .map(bay -> new BayDTO(bay.getId(), bay.getTray() != null ? mapToDTO(bay.getTray()) : null))
                 .collect(Collectors.toList());
 
-        return new ClassroomDTO(classroom.getName(), classroom.getStatus().toString(), bayDTOs);
+        List<TrayDTO> trayDTOs = classroom.getTrays().stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        return new ClassroomDTO(classroom.getId(), classroom.getName(), classroom.getStatus().toString(), bayDTOs, trayDTOs);
     }
 
     private TrayDTO mapToDTO(Tray tray) {
         List<ItemDTO> itemDTOs = tray.getItems().stream()
-                .map(item -> new ItemDTO(item.getId().toString(), item.getName()))
+                .map(item -> new ItemDTO(item.getId(), item.getName()))
                 .collect(Collectors.toList());
 
-        return new TrayDTO(tray.getId().toString(), itemDTOs);
+        Long bayID = tray.getBay() != null ? tray.getBay().getId() : null;
+        Classroom classroom = tray.getClassroom();
+        return new TrayDTO(tray.getId(), itemDTOs, classroom.getId(), classroom.getName(), bayID);
     }
 }

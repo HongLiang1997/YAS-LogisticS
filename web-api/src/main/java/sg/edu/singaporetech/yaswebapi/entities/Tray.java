@@ -24,6 +24,10 @@ public class Tray {
     @JoinColumn(name = "bay_id", unique = true)
     private Bay bay;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private Classroom classroom;
+
     @OneToMany(mappedBy = "tray", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items;
 }
