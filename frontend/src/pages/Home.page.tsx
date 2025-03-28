@@ -9,10 +9,22 @@ import {
   Text,
   TextInput,
   Title,
+  ColorSchemeScript
 } from '@mantine/core';
 import { useState } from 'react';
 import classes from '../components/css/AuthenticationTitle.module.css';
-import { ColorSchemeScript } from '@mantine/core';
+import {API_URL} from "@/consts";
+import Cookies from 'js-cookie'
+import { notifications } from '@mantine/notifications';
+
+/**
+ * Redirects to admin panel after a set delay.
+ */
+function redirectToAdminPanel(delayMillisecond = 2000) {
+  setTimeout(() => {
+    window.location.href = '/adminpanel';
+  }, delayMillisecond);
+}
 
 export function HomePage() {
   const [username, setUsername] = useState('');
@@ -22,12 +34,13 @@ export function HomePage() {
   const handleLogin = async () => {
     setError(''); // Clear previous errors
     try {
-      const response = await fetch('https://your-api.com/login', {
+      const loginURL = `${API_URL}/api/account/login`;
+      const response = await fetch(loginURL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email: username, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
@@ -36,7 +49,23 @@ export function HomePage() {
 
       const data = await response.json();
       console.log('Login successful:', data);
-      // Redirect user or store token in localStorage/sessionStorage
+
+      const isSuccess = data.success;
+      if (isSuccess) {
+        // Save session token into cookie,
+        const token = data.token;
+        Cookies.set('token', token, { secure: true, expires: 7 });
+        // Notify then redirect...
+        notifications.show({
+          title: "Login Success",
+          message: "Redirecting you to the admin panel...",
+          color: "green"
+        })
+        redirectToAdminPanel();
+      } else {
+        // Failure
+        setError("Invalid credentials");
+      }
     } catch (err: any) {
       setError(err.message);
     }
