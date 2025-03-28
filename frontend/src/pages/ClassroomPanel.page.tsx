@@ -13,6 +13,7 @@ import editClassroomStatusService from '@/services/editClassroomStatusService';
 import getClassroomsService from '@/services/getClassroomsService';
 import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
 import redirectWithDelay from '@/utils/redirectWithDelay';
+import {StatisticsView} from "@/components/ClassroomPanelPage/StatisticsView";
 
 export function ClassroomPanelPage() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -182,6 +183,9 @@ export function ClassroomPanelPage() {
               <Tabs.Tab value="trays" leftSection={<IconTir size={12} />}>
                 Trays
               </Tabs.Tab>
+              <Tabs.Tab value="statistics" leftSection={<IconTir size={12} />}>
+                Statistics
+              </Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="bays">
@@ -196,6 +200,10 @@ export function ClassroomPanelPage() {
                 trays={classroom.trays}
                 classroomIsClosed={classroom.status === ClassroomStatus.CLOSED}
               />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="statistics">
+              <StatisticsView classroom={classroom} />
             </Tabs.Panel>
           </Tabs>
         )}
