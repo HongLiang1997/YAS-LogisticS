@@ -991,6 +991,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/modals@npm:^7.17.3":
+  version: 7.17.3
+  resolution: "@mantine/modals@npm:7.17.3"
+  peerDependencies:
+    "@mantine/core": 7.17.3
+    "@mantine/hooks": 7.17.3
+    react: ^18.x || ^19.x
+    react-dom: ^18.x || ^19.x
+  checksum: 10c0/7bd0b7718c78294100b2cf134f5b4e0fbf9955761826d5e00f20e84ef83fea954bb7be6144b3ee777a10fdf94ca5128c5775e211f1053eeeefa240263c92aad5
+  languageName: node
+  linkType: hard
+
 "@mantine/notifications@npm:^7.17.3":
   version: 7.17.3
   resolution: "@mantine/notifications@npm:7.17.3"
@@ -4717,6 +4729,7 @@ __metadata:
     "@mantine/charts": "npm:^7.17.0"
     "@mantine/core": "npm:7.17.0"
     "@mantine/hooks": "npm:7.17.0"
+    "@mantine/modals": "npm:^7.17.3"
     "@mantine/notifications": "npm:^7.17.3"
     "@storybook/react": "npm:^8.5.0"
     "@storybook/react-vite": "npm:^8.5.0"

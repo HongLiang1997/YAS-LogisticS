@@ -6,12 +6,15 @@ import { Notifications } from '@mantine/notifications';
 
 import { Router } from './Router';
 import { theme } from './theme';
+import {ModalsProvider} from "@mantine/modals";
 
 export default function App() {
   return (
     <MantineProvider theme={theme}>
-      <Notifications position="bottom-center"/>
-      <Router />
+      <ModalsProvider>
+        <Notifications position="bottom-center"/>
+        <Router />
+      </ModalsProvider>
     </MantineProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HomePage } from './pages/Home.page';
-import { AdminpanelPage } from './pages/Adminpanel.page';
+import { AdminPanelPage } from './pages/AdminPanel.page';
 
 const router = createBrowserRouter([
   {
@@ -13,7 +13,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/adminpanel',
-    element: <AdminpanelPage />,
+    element: <AdminPanelPage />,
   },
   
 ]);
