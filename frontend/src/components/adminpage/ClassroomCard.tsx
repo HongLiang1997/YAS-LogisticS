@@ -24,7 +24,7 @@ export function ClassroomCard({ classroom }: ClassroomCardProps) {
 
       <Group justify="space-between" mt="md" mb="xs">
         <Text fw={500}>{classroom.name}</Text>
-        {ClassroomStatusBadge(classroom.ClassroomStatus)}
+        {ClassroomStatusBadge(classroom.status)}
       </Group>
 
       <Text size="sm" c="dimmed">
@@ -36,7 +36,7 @@ export function ClassroomCard({ classroom }: ClassroomCardProps) {
       </Button>
 
       {
-        classroom.ClassroomStatus === ClassroomStatus.OPEN &&
+        classroom.status === ClassroomStatus.OPEN &&
         <Text size="sm" c="dimmed">Open classroom cant be edited!</Text>
       }
     </Card>

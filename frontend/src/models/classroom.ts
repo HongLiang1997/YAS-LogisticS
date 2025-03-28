@@ -5,7 +5,7 @@ import Tray from "@/models/tray";
 export default interface Classroom {
   id: number;
   name: string;
-  ClassroomStatus: ClassroomStatus;
+  status: ClassroomStatus;
   bays: Bay[];
   trays: Tray[];
 }

@@ -2,7 +2,7 @@ import {API_URL} from "@/consts";
 import Cookies from "js-cookie";
 import {ClassroomStatus} from "@/enums/ClassroomStatus";
 
-export default async function editTrayService(
+export default async function editClassroomStatusService(
   classroomID: number,
   classroomName: string,
   classroomStatus: ClassroomStatus
