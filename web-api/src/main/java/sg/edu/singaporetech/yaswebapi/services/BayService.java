@@ -58,6 +58,7 @@ public class BayService {
 
         logger.debug("Tray {} set to loaned.", targetTray.getId());
         targetTray.setStatus(TrayStatus.LOANED);
+        targetTray.setBay(null);
         trayRepository.save(targetTray);
         return true;
     }

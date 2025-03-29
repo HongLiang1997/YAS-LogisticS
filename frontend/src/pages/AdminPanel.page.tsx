@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AppShell, TextInput } from '@mantine/core';
+import {AppShell, Group, Button, Modal, TextInput, Space} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { ClassroomsView } from '@/components/adminpage/ClassroomsView';
 import { AdminHeader } from '@/components/nav/AdminHeader';
@@ -11,6 +10,7 @@ import createClassroomService from '@/services/createClassroomService';
 import getClassroomsService from '@/services/getClassroomsService';
 import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
 
+
 export function AdminPanelPage() {
 
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
@@ -18,6 +18,8 @@ export function AdminPanelPage() {
   const [buttonIsDisabled, setButtonIsDisabled] = useState(false);
   const [buttonIsLoading, setButtonIsLoading] = useState(false);
   const [newClassroomName, setNewClassroomName] = useState('');
+
+  const [opened, { open, close }] = useDisclosure(false);
 
   useEffect(() => {
     const redirected = redirectIfFailAuth();
@@ -42,77 +44,87 @@ export function AdminPanelPage() {
   /**
    * Popup a modal to ask for classroom name before creation.
    */
-  const popupCreateClassroomModal = async () => {
-    modals.openConfirmModal({
-      title: 'Delete your profile',
-      centered: true,
-      children: (
-        <TextInput
-          size="md"
-          radius="md"
-          label="Classroom Name"
-          placeholder="New Classroom Name Here"
-          value={newClassroomName}
-          onChange={(event) => setNewClassroomName(event.target.value)}
-        />
-      ),
-      labels: { confirm: 'Create Classroom', cancel: 'Cancel' },
-      confirmProps: { color: 'blue', loading: buttonIsLoading },
-      cancelProps: { disabled: buttonIsDisabled },
-      onCancel: () => modals.closeAll(),
-      onConfirm: () => {
-        if (buttonIsLoading) {
-          return;
-        }
+  const confirmCreateClassroom = () => {
+    if (buttonIsLoading) {
+      return;
+    }
 
-        setButtonIsDisabled(true);
-        setButtonIsLoading(true);
-        // API Request; After getting result, notification and close popup modal.
-        createClassroomService(newClassroomName).then((result) => {
-          setButtonIsLoading(false);
-          setButtonIsDisabled(false);
+    setButtonIsDisabled(true);
+    setButtonIsLoading(true);
+    // API Request; After getting result, notification and close popup modal.
+    createClassroomService(newClassroomName).then((result) => {
+      setButtonIsLoading(false);
+      setButtonIsDisabled(false);
 
-          if (result == null) {
-            notifications.show({
-              title: 'Failed to create classroom!',
-              message: 'Failed to create classroom! Try again later!',
-              color: 'red',
-            });
-            return;
-          }
-
-          // Append new classroom with ID
-          setClassrooms([
-            ...classrooms,
-            {
-              id: result,
-              name: newClassroomName,
-              status: ClassroomStatus.CLOSED,
-              bays: [],
-              trays: []
-            },
-          ]);
-
-          notifications.show({
-            title: 'Created new classroom.',
-            message: `Successfully created classroom ${newClassroomName}`,
-            color: 'blue',
-          });
-          setNewClassroomName('');
-          modals.closeAll();
+      if (result == null) {
+        notifications.show({
+          title: 'Failed to create classroom!',
+          message: 'Failed to create classroom! Try again later!',
+          color: 'red',
         });
-      },
+        return;
+      }
+
+      // Append new classroom with ID
+      setClassrooms([
+        ...classrooms,
+        {
+          id: result,
+          name: newClassroomName,
+          status: ClassroomStatus.CLOSED,
+          bays: [],
+          trays: []
+        },
+      ]);
+
+      notifications.show({
+        title: 'Created new classroom.',
+        message: `Successfully created classroom ${newClassroomName}`,
+        color: 'blue',
+      });
+      setNewClassroomName('');
+      close();
     });
-  };
+  }
 
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AdminHeader/>
 
       <AppShell.Main>
+        <Modal opened={opened} onClose={close} title="Create CLassroom">
+          <TextInput
+            size="md"
+            radius="md"
+            label="Classroom Name"
+            placeholder="New Classroom Name Here"
+            value={newClassroomName}
+            onChange={(event) => setNewClassroomName(event.target.value)}
+          />
+
+          <Space h="md"/>
+
+          <Group>
+           <Button
+             color='gray'
+             disabled={buttonIsDisabled}
+           >
+             Cancel
+           </Button>
+
+            <Button
+              color='green'
+              loading={buttonIsLoading}
+              onClick={confirmCreateClassroom}
+            >
+              Create Classroom
+            </Button>
+          </Group>
+        </Modal>
+
         <ClassroomsView
           classrooms={classrooms}
-          onRequestCreateClassroom={() => popupCreateClassroomModal()}
+          onRequestCreateClassroom={() => open()}
         />
       </AppShell.Main>
     </AppShell>
