@@ -4,19 +4,20 @@ import {
   ActionIcon,
   Badge,
   Button,
-  Card,
+  Card, Divider,
   Group,
   Image,
-  List,
+  List, Modal,
   Space,
   Text,
   TextInput,
 } from '@mantine/core';
 import { modals } from "@mantine/modals";
-import trayImage from '@/images/tray.jpg';
+import trayImage from '../images/tray.jpg';
 import Tray from '@/models/tray';
 import editTrayService from "@/services/editTrayService";
 import deleteBayService from "@/services/deleteBayService";
+import {useDisclosure} from "@mantine/hooks";
 
 
 interface TrayCardProps {
@@ -24,20 +25,21 @@ interface TrayCardProps {
   classroomIsClosed: boolean;
 }
 
-/**
- * Popup Modal to edit a tray that is inside a bay.
- *
- * Has a list of text field to edit and delete existing item names.
- * Button to add more item.
- *
- * Cancel and Confirm button; Refresh page after sent API request on confirm.
- * @param targetBayID
- * @param existingItemNames
- */
-function popupEditTrayModal(targetBayID: number, existingItemNames: string[]) {
+function TrayStatusBadge(tray: Tray) {
+  if (tray.bayID === null) {
+    return <Badge color="blue">LOANED</Badge>;
+  }
+
+  return <Badge color="pink">IN BAY</Badge>;
+}
+
+export function TrayCard({ tray, classroomIsClosed }: TrayCardProps) {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [itemNames, setItemNames] = useState(existingItemNames);
+  const [itemNames, setItemNames] = useState<string[]>([]);
+
+  const [currentEditingBayID, setCurrentEditingBayID] = useState<number>(-1);
+  const [opened, { open, close }] = useDisclosure(false);
 
   const handleItemNameChange = (index: number, newName: string) => {
     const updatedItemNames = [...itemNames];
@@ -54,188 +56,197 @@ function popupEditTrayModal(targetBayID: number, existingItemNames: string[]) {
     setItemNames([...itemNames, 'new item']);
   };
 
-  modals.open({
-    title: 'Edit Tray Items',
-    children: (
-      <>
-        {
-          // Display all item names as a list of text input, with action button to delete the current item...
-          itemNames.map((itemName, index) => {
-            const deleteCurrentItemActionButton = (
-              <ActionIcon
-                variant="subtle"
-                color="pink"
-                aria-label="Delete Item"
-                onClick={() => handleDeleteItem(index)}
-              >
-                <IconBackspaceFilled style={{ width: '70%', height: '70%' }} stroke={1.5} />
-              </ActionIcon>
-            );
-
-            return (
-              <TextInput
-                key={index}
-                leftSectionPointerEvents="none"
-                rightSection={deleteCurrentItemActionButton}
-                description="Item Name"
-                value={itemName}
-                onChange={(event) => handleItemNameChange(index, event.currentTarget.value)}
-              />
-            );
-          })
+  /**
+   * Popup a Modal with Modal Manager, asking to confirm delete.
+   *
+   * On confirm delete, call API server then refresh page.
+   * @param targetBayID
+   */
+  const popupConfirmDeleteBayModal = (targetBayID: number) => {
+    modals.openConfirmModal({
+      title: `Delete Bay ${targetBayID}`,
+      centered: true,
+      children: (
+        <>
+          <Text size="sm">
+            Are you sure you want to delete the bay?
+          </Text>
+          <Text size="sm">
+            This action will delete any tray within the bay as well.
+          </Text>
+        </>
+      ),
+      labels: { confirm: 'Delete Bay', cancel: "No don't delete it" },
+      cancelProps: { disabled: buttonDisabled },
+      confirmProps: { color: 'red', loading: isLoading },
+      onCancel: () => modals.closeAll(),
+      // Delete and then refresh page
+      onConfirm: () =>  {
+        if (buttonDisabled) {
+          return;
         }
 
-        {/* Button to add new item */}
-        <Button
-          rightSection={<IconCirclePlus size={14} />}
-          onClick={() => handleAddItem()}
-        >
-          Add Item
-        </Button>
-
-        <Space h="md" />
-
-        <Group justify="center" grow>
-          <Button
-            variant="filled"
-            size="md"
-            radius="md"
-            onClick={() => modals.closeAll()}
-            disabled={buttonDisabled}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            variant="filled"
-            color="green"
-            size="md"
-            radius="md"
-            onClick={
-              () => {
-                if (buttonDisabled) {
-                  return;
-                }
-
-                setIsLoading(true)
-                setButtonDisabled(true)
-                editTrayService(targetBayID, itemNames).then(_ => window.location.reload())
-              }
-            }
-            loading={isLoading}
-          >
-            Confirm
-          </Button>
-        </Group>
-      </>
-    ),
-  });
-}
-
-/**
- * Popup a Modal with Modal Manager, asking to confirm delete.
- *
- * On confirm delete, call API server then refresh page.
- * @param targetBayID
- */
-function popupConfirmDeleteBayModal(targetBayID: number) {
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  modals.openConfirmModal({
-    title: `Delete Bay ${targetBayID}`,
-    centered: true,
-    children: (
-      <>
-        <Text size="sm">
-          Are you sure you want to delete the bay?
-        </Text>
-        <Text size="sm">
-          This action will delete any tray within the bay as well.
-        </Text>
-      </>
-    ),
-    labels: { confirm: 'Delete Bay', cancel: "No don't delete it" },
-    cancelProps: { disabled: buttonDisabled },
-    confirmProps: { color: 'red', loading: isLoading },
-    onCancel: () => modals.closeAll(),
-    // Delete and then refresh page
-    onConfirm: () =>  {
-      if (buttonDisabled) {
-        return;
-      }
-
-      setIsLoading(true);
-      setButtonDisabled(true);
-      deleteBayService(targetBayID).then(_ => window.location.reload())
-    },
-  });
-}
-
-function TrayStatusBadge(tray: Tray) {
-  if (tray.bayID === null) {
-    return <Badge color="blue">LOANED</Badge>;
+        setIsLoading(true);
+        setButtonDisabled(true);
+        deleteBayService(targetBayID).then(_ => window.location.reload())
+      },
+    });
   }
 
-  return <Badge color="pink">IN BAY</Badge>;
-}
 
-export function TrayCard({ tray, classroomIsClosed }: TrayCardProps) {
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder>
-      <Card.Section>
-        <Image src={trayImage} height={160} alt="Bay Image" />
-      </Card.Section>
+    <>
+      { /* Edit tray Modal */ }
+      <Modal opened={opened} onClose={close} title="Edit Tray">
+          <>
+            {
+              // Display all item names as a list of text input, with action button to delete the current item...
+              itemNames.map((itemName, index) => {
+                const deleteCurrentItemActionButton = (
+                  <ActionIcon
+                    variant="subtle"
+                    color="pink"
+                    aria-label="Delete Item"
+                    onClick={() => handleDeleteItem(index)}
+                  >
+                    <IconBackspaceFilled style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                  </ActionIcon>
+                );
 
-      <Group justify="space-between" mt="md" mb="xs">
-        <Text fw={500}>{tray.id}</Text>
-        {TrayStatusBadge(tray)}
-      </Group>
+                return (
+                  <>
+                    <TextInput
+                      key={index}
+                      leftSectionPointerEvents="none"
+                      rightSection={deleteCurrentItemActionButton}
+                      description="Item Name"
+                      value={itemName}
+                      onChange={(event) => handleItemNameChange(index, event.currentTarget.value)}
+                    />
+                    <Space h="xs" />
+                  </>
+                );
+              })
+            }
 
-      <Text size="lg" fw={700}>Items: </Text>
-      <List>
+            <Space h="xs" />
 
-      {
-        /* Show the items inside the tray */
-        tray.items.map((item) =>
-          <List.Item key={item.id}>{item.name}</List.Item>
-        )
-      }
-      </List>
+            {/* Button to add new item */}
+            <Button
+              rightSection={<IconCirclePlus size={14} />}
+              onClick={() => handleAddItem()}
+            >
+              Add Item
+            </Button>
 
-      {/* Edit Button followed by delete button */}
-      <Group justify="space-between" mt="md" mb="xs">
-        <Button
-          color="blue"
-          fullWidth mt="md"
-          radius="md"
-          disabled={!classroomIsClosed || tray.bayID == null}
-          onClick={() => popupEditTrayModal(tray.bayID!, tray.items.map(item => item.name))}
-        >
-          Edit Tray
-        </Button>
+            <Space h="md" />
+            <Divider my="md" />
 
-        <Button
-          color="red"
-          fullWidth mt="md"
-          radius="md"
-          disabled={!classroomIsClosed || tray.bayID == null}
-          onClick={() => popupConfirmDeleteBayModal(tray.bayID!)}
-        >
-          Delete Bay
-        </Button>
+            <Group justify="center" grow>
+              <Button
+                variant="filled"
+                size="md"
+                radius="md"
+                onClick={() => modals.closeAll()}
+                disabled={buttonDisabled}
+                color='gray'
+              >
+                Cancel
+              </Button>
 
-      </Group>
+              <Button
+                variant="filled"
+                color="green"
+                size="md"
+                radius="md"
+                onClick={
+                  () => {
+                    if (buttonDisabled) {
+                      return;
+                    }
 
-      {
-        !classroomIsClosed &&
-          <Text size="sm" c="dimmed">Edits are denied for open classrooms!</Text>
-      }
+                    setIsLoading(true)
+                    setButtonDisabled(true)
+                    editTrayService(currentEditingBayID, itemNames).then(_ => window.location.reload())
+                  }
+                }
+                loading={isLoading}
+              >
+                Confirm
+              </Button>
+            </Group>
+          </>
+      </Modal>
 
-      {
-        tray.bayID == null &&
-          <Text size="sm" c="dimmed">Tray needs to be docked to be edited!</Text>
-      }
-    </Card>
+      <Card shadow="sm" padding="lg" radius="md" withBorder>
+        <Card.Section>
+          <Image src={trayImage} height={160} alt="Bay Image" />
+        </Card.Section>
+
+        <Group justify="space-between" mt="md" mb="xs">
+          <Text fw={500} c='indigo'>ID: {tray.id}</Text>
+          {TrayStatusBadge(tray)}
+        </Group>
+
+        {
+          /* Show the items inside the tray */
+          tray.items.length >= 1 &&
+          <>
+            <Text size="lg" fw={700}>Items: </Text>
+            <List>
+              {
+                tray.items.map((item) =>
+                  <List.Item key={item.id}>{item.name}</List.Item>
+                )
+              }
+            </List>
+          </>
+        }
+
+        {
+          /* No items configured for the tray...*/
+          tray.items.length <= 0 &&
+          <Text size="lg" fw={700} c='pink'>No Items configured for this tray!</Text>
+        }
+
+        {/* Edit Button followed by delete button */}
+        <Group justify="space-between" mt="md" mb="xs">
+          <Button
+            color="blue"
+            fullWidth mt="md"
+            radius="md"
+            disabled={!classroomIsClosed || tray.bayID == null}
+            onClick={() => {
+              setItemNames(tray.items.map((item) => item.name))
+              setCurrentEditingBayID(tray.bayID!)
+              open()
+            }}
+          >
+            Edit Tray
+          </Button>
+
+          <Button
+            color="red"
+            fullWidth mt="md"
+            radius="md"
+            disabled={!classroomIsClosed || tray.bayID == null}
+            onClick={() => popupConfirmDeleteBayModal(tray.bayID!)}
+          >
+            Delete Bay
+          </Button>
+
+        </Group>
+
+        {
+          !classroomIsClosed &&
+            <Text size="sm" c="dimmed">Edits are denied for open classrooms!</Text>
+        }
+
+        {
+          tray.bayID == null &&
+            <Text size="sm" c="dimmed">Tray needs to be docked to be edited!</Text>
+        }
+      </Card>
+    </>
   );
 }

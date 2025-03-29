@@ -11,8 +11,8 @@ function generateLoanedTrayData(classroom: Classroom) {
   const dockedTraysCount = classroom.trays.filter(tray => tray.bayID != null).length;
 
   return [
-    { name: 'Loaned', value: loanedTraysCount, color: 'pink' },
-    { name: 'Docked', value: dockedTraysCount, color: 'indigo' },
+    { name: 'Loaned', value: loanedTraysCount + 1, color: 'pink' },
+    { name: 'Docked', value: dockedTraysCount + 1, color: 'indigo' },
   ]
 }
 
@@ -28,13 +28,13 @@ export function StatisticsView({ classroom }: StatisticsViewProps) {
         Current Tray Loaning Status
       </Text>
       <PieChart
+        size={300}
         withLabelsLine
         labelsPosition="outside"
         labelsType="percent"
         data={generateLoanedTrayData(classroom)}
         withTooltip
         tooltipDataSource="segment"
-        mx="auto"
       />
     </div>
   )

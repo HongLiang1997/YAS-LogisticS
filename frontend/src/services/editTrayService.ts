@@ -13,6 +13,7 @@ export default async function editTrayService(
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         id: bayID,

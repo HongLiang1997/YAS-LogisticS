@@ -12,8 +12,6 @@ import getClassroomsService from '@/services/getClassroomsService';
 import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
 
 export function AdminPanelPage() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
 
@@ -109,12 +107,7 @@ export function AdminPanelPage() {
 
   return (
     <AppShell header={{ height: 60 }} padding="md">
-      <AdminHeader
-        mobileOpened={mobileOpened}
-        toggleMobile={toggleMobile}
-        desktopOpened={desktopOpened}
-        toggleDesktop={toggleDesktop}
-      />
+      <AdminHeader/>
 
       <AppShell.Main>
         <ClassroomsView

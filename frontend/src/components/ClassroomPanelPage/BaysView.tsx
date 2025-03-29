@@ -32,6 +32,7 @@ export function BayViews({
         size="md"
         rightSection={<IconPlus size={16}/>}
         onClick={() => onRequestCreateBay()}
+        disabled={!classroomIsClosed}
       >
         Add Bay
       </Button>

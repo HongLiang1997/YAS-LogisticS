@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IconBlocks, IconTir } from '@tabler/icons-react';
-import {AppShell, Button, Space, Tabs, Text, TextInput} from '@mantine/core';
+import {AppShell, Button, Space, Tabs, Text} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { BayViews } from '@/components/ClassroomPanelPage/BaysView';
@@ -15,10 +15,9 @@ import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
 import redirectWithDelay from '@/utils/redirectWithDelay';
 import {StatisticsView} from "@/components/ClassroomPanelPage/StatisticsView";
 import createBayService from "@/services/createBayService";
+import refreshWithDelay from "@/utils/refreshWithDelay";
 
 export function ClassroomPanelPage() {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   const [classroom, setClassroom] = useState<Classroom>();
   const [buttonIsLoading, setButtonIsLoading] = useState<boolean>(false);
 
@@ -145,16 +144,12 @@ export function ClassroomPanelPage() {
       message: `Successfully created new bay with ID ${result}.`,
       color: 'blue'
     })
+    refreshWithDelay()
   }
 
   return (
     <AppShell header={{ height: 60 }} padding="md">
-      <AdminHeader
-        mobileOpened={mobileOpened}
-        toggleMobile={toggleMobile}
-        desktopOpened={desktopOpened}
-        toggleDesktop={toggleDesktop}
-      />
+      <AdminHeader/>
 
       <AppShell.Main>
         {
@@ -193,7 +188,7 @@ export function ClassroomPanelPage() {
               <Text fw={700} size="xl">
                 Classroom is Closed for students
               </Text>
-              <Space />
+              <Space h="xl" />
               <Button
                 variant="filled"
                 size="md"
@@ -207,9 +202,9 @@ export function ClassroomPanelPage() {
           )
         }
 
-        <Space />
+        <Space h="xl" />
         {classroom !== undefined && (
-          <Tabs variant="outline" radius="md" defaultValue="gallery">
+          <Tabs  color="indigo" radius="md" defaultValue="bays">
             <Tabs.List>
               <Tabs.Tab value="bays" leftSection={<IconBlocks size={12} />}>
                 Bays

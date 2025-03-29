@@ -15,6 +15,7 @@ export default async function editClassroomStatusService(
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         id: classroomID,

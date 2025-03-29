@@ -1,23 +1,22 @@
-import { AppShell, Burger, Group, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import {ActionIcon, AppShell, Group, Text} from '@mantine/core';
 import { ColorSchemeToggle } from '../ColorScheme/ColorSchemeToggle';
-import Logo from '../images/yas_logistics_icon.svg';  // Adjust the path based on your folder structure
+import {IconHome} from "@tabler/icons-react";
+import redirectWithDelay from "@/utils/redirectWithDelay";  // Adjust the path based on your folder structure
 
-interface AdminHeaderProps {
-    mobileOpened: boolean;
-    toggleMobile: () => void;
-    desktopOpened: boolean;
-    toggleDesktop: () => void;
-}
-
-export function AdminHeader({ mobileOpened, toggleMobile, desktopOpened, toggleDesktop }: AdminHeaderProps) {
+export function AdminHeader() {
     return (
         <AppShell.Header>
             <Group h="100%" px="md" justify="space-between">
                 <Group>
-                    <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-                    <Burger opened={desktopOpened} onClick={toggleDesktop} visibleFrom="sm" size="sm" />
                     <Text size="lg" fw={700}>YAS Logistics</Text>
+
+                    <ActionIcon variant="subtle" size="xl" radius="md" aria-label="Home"
+                      onClick={() => {
+                        redirectWithDelay("/adminpanel", 0)
+                      }}
+                    >
+                      <IconHome style={{ width: '70%', height: '70%' }} stroke={1.5} />
+                    </ActionIcon>
                 </Group>
                 <ColorSchemeToggle />
             </Group>

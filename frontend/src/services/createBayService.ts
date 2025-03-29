@@ -17,6 +17,7 @@ export default async function createBayService(
       method: 'POST',
       headers: {
         Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         classroomID

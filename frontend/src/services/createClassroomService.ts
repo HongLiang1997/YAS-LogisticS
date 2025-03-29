@@ -15,6 +15,7 @@ export default async function createClassroomService(name: string): Promise<numb
       method: 'POST',
       headers: {
         Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name,
