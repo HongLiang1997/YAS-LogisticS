@@ -6,13 +6,19 @@ import {BayCard} from "@/components/ClassroomPanelPage/BayCard";
 interface BaysViewProps {
   bays: Bay[];
   classroomIsClosed: boolean;
+  onRequestCreateBay: () => void;
 }
 
 /**
  * Simple Grid view of all bays for a classroom.
  * @constructor
  */
-export function BayViews({ bays, classroomIsClosed }: BaysViewProps) {
+export function BayViews({
+                           bays,
+                           classroomIsClosed,
+                           onRequestCreateBay
+}: BaysViewProps
+) {
   return (
     <SimpleGrid cols={2} spacing="xl">
       {
@@ -25,6 +31,7 @@ export function BayViews({ bays, classroomIsClosed }: BaysViewProps) {
       <Button
         size="md"
         rightSection={<IconPlus size={16}/>}
+        onClick={() => onRequestCreateBay()}
       >
         Add Bay
       </Button>

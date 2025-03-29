@@ -146,7 +146,7 @@ function popupConfirmDeleteBayModal(targetBayID: number) {
     labels: { confirm: 'Delete Bay', cancel: "No don't delete it" },
     cancelProps: { disabled: buttonDisabled },
     confirmProps: { color: 'red', loading: isLoading },
-    onCancel: () => console.log('Cancel'),
+    onCancel: () => modals.closeAll(),
     // Delete and then refresh page
     onConfirm: () =>  {
       if (buttonDisabled) {

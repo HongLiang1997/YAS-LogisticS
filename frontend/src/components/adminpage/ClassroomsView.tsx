@@ -6,13 +6,14 @@ import {IconPlus} from "@tabler/icons-react";
 
 interface ClassroomsViewProps {
   classrooms: Classroom[];
+  onRequestCreateClassroom: () => void;
 }
 
 /**
  * Simple Grid view of all classrooms.
  * @constructor
  */
-export function ClassroomsView({ classrooms }: ClassroomsViewProps) {
+export function ClassroomsView({ classrooms, onRequestCreateClassroom }: ClassroomsViewProps) {
   return (
     <SimpleGrid cols={2} spacing="xl">
       {
@@ -25,6 +26,7 @@ export function ClassroomsView({ classrooms }: ClassroomsViewProps) {
       <Button
         size="md"
         rightSection={<IconPlus size={16}/>}
+        onClick={() => onRequestCreateClassroom()}
       >
         Add Classroom
       </Button>

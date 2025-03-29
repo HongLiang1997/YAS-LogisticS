@@ -1,54 +1,127 @@
 import { useEffect, useState } from 'react';
-import { AppShell } from '@mantine/core';
+import { AppShell, TextInput } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { modals } from '@mantine/modals';
+import { notifications } from '@mantine/notifications';
+import { ClassroomsView } from '@/components/adminpage/ClassroomsView';
 import { AdminHeader } from '@/components/nav/AdminHeader';
+import { ClassroomStatus } from '@/enums/ClassroomStatus';
+import Classroom from '@/models/classroom';
+import createClassroomService from '@/services/createClassroomService';
+import getClassroomsService from '@/services/getClassroomsService';
 import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
-import Classroom from "@/models/classroom";
-import getClassroomsService from "@/services/getClassroomsService";
-import {notifications} from "@mantine/notifications";
-import {ClassroomsView} from "@/components/adminpage/ClassroomsView";
 
 export function AdminPanelPage() {
-    const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
-    const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
-    const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
 
-    useEffect(() => {
-      const redirected = redirectIfFailAuth()
-      if (redirected) {
+  const [buttonIsDisabled, setButtonIsDisabled] = useState(false);
+  const [buttonIsLoading, setButtonIsLoading] = useState(false);
+  const [newClassroomName, setNewClassroomName] = useState('');
+
+  useEffect(() => {
+    const redirected = redirectIfFailAuth();
+    if (redirected) {
+      return;
+    }
+
+    getClassroomsService().then((classrooms) => {
+      if (classrooms == null) {
+        notifications.show({
+          title: 'API Failure',
+          message: 'Failed to load classrooms! Try again later.',
+          color: 'red',
+        });
         return;
       }
 
-      getClassroomsService().then(classrooms => {
-        if (classrooms == null) {
-          notifications.show({
-            title: "API Failure",
-            message: "Failed to load classrooms! Try again later.",
-            color: 'red'
-          })
+      setClassrooms(classrooms);
+    });
+  }, []);
+
+  /**
+   * Popup a modal to ask for classroom name before creation.
+   */
+  const popupCreateClassroomModal = async () => {
+    modals.openConfirmModal({
+      title: 'Delete your profile',
+      centered: true,
+      children: (
+        <TextInput
+          size="md"
+          radius="md"
+          label="Classroom Name"
+          placeholder="New Classroom Name Here"
+          value={newClassroomName}
+          onChange={(event) => setNewClassroomName(event.target.value)}
+        />
+      ),
+      labels: { confirm: 'Create Classroom', cancel: 'Cancel' },
+      confirmProps: { color: 'blue', loading: buttonIsLoading },
+      cancelProps: { disabled: buttonIsDisabled },
+      onCancel: () => modals.closeAll(),
+      onConfirm: () => {
+        if (buttonIsLoading) {
           return;
         }
 
-        setClassrooms(classrooms);
-      })
-    }, []);
+        setButtonIsDisabled(true);
+        setButtonIsLoading(true);
+        // API Request; After getting result, notification and close popup modal.
+        createClassroomService(newClassroomName).then((result) => {
+          setButtonIsLoading(false);
+          setButtonIsDisabled(false);
 
-    return (
-        <AppShell
-            header={{ height: 60 }}
-            padding="md">
+          if (result == null) {
+            notifications.show({
+              title: 'Failed to create classroom!',
+              message: 'Failed to create classroom! Try again later!',
+              color: 'red',
+            });
+            return;
+          }
 
-            <AdminHeader
-                mobileOpened={mobileOpened}
-                toggleMobile={toggleMobile}
-                desktopOpened={desktopOpened}
-                toggleDesktop={toggleDesktop}
-            />
+          // Append new classroom with ID
+          setClassrooms([
+            ...classrooms,
+            {
+              id: result,
+              name: newClassroomName,
+              status: ClassroomStatus.CLOSED,
+              bays: [],
+              trays: []
+            },
+          ]);
 
-            <AppShell.Main>
-              <ClassroomsView classrooms={classrooms} />
-            </AppShell.Main>
-        </AppShell>
-    );
+          notifications.show({
+            title: 'Created new classroom.',
+            message: `Successfully created classroom ${newClassroomName}`,
+            color: 'blue',
+          });
+          setNewClassroomName('');
+          modals.closeAll();
+        });
+      },
+    });
+  };
+
+  return (
+    <AppShell header={{ height: 60 }} padding="md">
+      <AdminHeader
+        mobileOpened={mobileOpened}
+        toggleMobile={toggleMobile}
+        desktopOpened={desktopOpened}
+        toggleDesktop={toggleDesktop}
+      />
+
+      <AppShell.Main>
+        <ClassroomsView
+          classrooms={classrooms}
+          onRequestCreateClassroom={() => popupCreateClassroomModal()}
+        />
+      </AppShell.Main>
+    </AppShell>
+  );
 }

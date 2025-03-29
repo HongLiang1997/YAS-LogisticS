@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IconBlocks, IconTir } from '@tabler/icons-react';
-import { AppShell, Button, Space, Tabs, Text } from '@mantine/core';
+import {AppShell, Button, Space, Tabs, Text, TextInput} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { BayViews } from '@/components/ClassroomPanelPage/BaysView';
@@ -14,12 +14,14 @@ import getClassroomsService from '@/services/getClassroomsService';
 import redirectIfFailAuth from '@/utils/redirectIfFailAuth';
 import redirectWithDelay from '@/utils/redirectWithDelay';
 import {StatisticsView} from "@/components/ClassroomPanelPage/StatisticsView";
+import createBayService from "@/services/createBayService";
 
 export function ClassroomPanelPage() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   const [classroom, setClassroom] = useState<Classroom>();
   const [buttonIsLoading, setButtonIsLoading] = useState<boolean>(false);
+
 
   useEffect(() => {
     const redirected = redirectIfFailAuth();
@@ -113,6 +115,38 @@ export function ClassroomPanelPage() {
     setClassroom(updatedClassroom);
   };
 
+  const handleCreateBay = async () => {
+    if (classroom == null || buttonIsLoading == null) {
+      return;
+    }
+
+    setButtonIsLoading(true);
+    const result = await createBayService(classroom.id)
+    setButtonIsLoading(false);
+
+    if (result == null) {
+      notifications.show({
+        title: "Failed to create bay!",
+        message: 'An error occurred in creating bay! Try again later.',
+        color: 'red'
+      })
+      return;
+    }
+
+    const newBay = classroom.bays;
+    newBay.push({
+      id: result,
+      tray: null
+    })
+
+    setClassroom({...classroom, bays: newBay});
+    notifications.show({
+      title: "Created new bay!",
+      message: `Successfully created new bay with ID ${result}.`,
+      color: 'blue'
+    })
+  }
+
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AdminHeader
@@ -192,6 +226,7 @@ export function ClassroomPanelPage() {
               <BayViews
                 bays={classroom.bays}
                 classroomIsClosed={classroom.status === ClassroomStatus.CLOSED}
+                onRequestCreateBay={() => handleCreateBay()}
               />
             </Tabs.Panel>
 
