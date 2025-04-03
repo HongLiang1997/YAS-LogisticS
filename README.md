@@ -41,9 +41,24 @@ To address these issues, we propose the development of an **automated equipment 
 
 ---
 ## Basket System
-### App Flow
-![Borrowing]()
-![Returning]()
+### Main App Flow
+#### Borrowing Process
+![Borrowing](flow/Borrowing_Process.png)
+#### Returning Process
+![Returning](flow/Returning_Process.png)
+### Profiling Overview
+We monitored the Raspberry Pi's processes, CPU load, and memory usage using htop—a tool that provides a user-friendly, colored, and interactive overview of system performance.
+
+In hopes to achieve the following findings:
+Identified high CPU usage during certain processes and pinpointed CPU bottlenecks.
+Optimized loops and reduced unnecessary computations to improve performance.
+#### Profiling for 1min Main App idle (Bluetooth + UltraSonic)
+[Profiling for 1min Main App idle](https://youtu.be/8enf9dl8N08)
+#### Profiling for 1min Main App In Use (Camera Object Detection + Bluetooth + UltraSonic)
+[rofiling for 1min Main App Usage](https://youtu.be/YnH06wi98oY)
+#### Profiling for 1min Standalone Camera Detection Script
+[1min Profiling on Standalone Camera Object Detection Scripts](https://youtu.be/XXH_SJPgu2E)
+
 ### Item Detection Model (YOLO v8 + Roboflow)
 #### Description
 This model is trained using YOLOv8 with a dataset prepared in Roboflow. It is designed for real-time object detection, drawing bounding boxes around detected items and labeling them with confidence scores. **STRICTLY RUN IN WINDOWS ONLY**
@@ -80,16 +95,6 @@ This script utilizes YOLOv8 for real-time object detection using a webcam feed. 
 
 #### Output
 ![Detection Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
-
-#### Profiling
-[1min Profiling on Standalone Camera Object Detection Scripts](https://youtu.be/XXH_SJPgu2E)
-Overview of processes, CPU load, and memory usage on the Raspberry Pi. 
-We ultilized htop as it is more user-friendly and provides additional information in a colored, interactive format.
-
-In  Hope to achieve following findings:
-Identified high CPU usage during certain processes and pinpointed CPU bottlenecks.
-Optimized loops and reduced unnecessary computations to improve performance.
-
 
 #### Web API
 
