@@ -78,6 +78,8 @@ This script utilizes YOLOv8 for real-time object detection using a webcam feed. 
 #### Output
 ![Before Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
 
+#### Profiling
+![Detection_vide](AnalysisCodes/profiling/detection_standalone.mp4)
 ---
 ### Item Detection Model (item_machine_learning.py)
 #### Description
