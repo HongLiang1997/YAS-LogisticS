@@ -79,7 +79,6 @@ This script utilizes YOLOv8 for real-time object detection using a webcam feed. 
 ![Before Image](AnalysisCodes/basket_system/Detection_screenshot_05.02.2025.png)
 
 ---
-## Black Bordered Box System
 ### Item Detection Model (item_machine_learning.py)
 #### Description
 This code trains a **Convolutional Neural Network (CNN)** to detect different rental items, specifically `raspberrypi4` and `raspberrypi4charger`. The model is trained using TensorFlow and Keras on a dataset of categorized images. 
@@ -198,10 +197,13 @@ Monitoring & Logging: Prometheus, Grafana, ELK stack for logs and metrics.
 4. Raspberry Pi 4 will take RSSI and calculate its distance
 5. Raspberry Pi 4 will calculate the position of basket by triangluation
 
+#### Bluetooth Standalone Testing to Find Specific Beacon
+![Beacon_Testing](AnalysisCodes/beacon/find_blue_5_location_fs.png)
 
 ### Ultrasonic Logic
 Ultrasonic will detect if tray is in the bay. The removal of tray from the bay will cause the distance detected by the Ultrasonic to be larger then set threshold, which will send notify backend servers that the tray has been loaned out. 
 
+## Black Bordered Box System(Legacy Prototype)
 ### Before and After Image Comparison
 Below are sample images demonstrating the **Before and After** item detection process:
 
