@@ -2,18 +2,26 @@ import numpy as np
 from bluepy.btle import Scanner, DefaultDelegate
 import time
 from scipy.optimize import least_squares
+import pygame
+
+def play_alert_sound():
+    pygame.mixer.init()
+    pygame.mixer.music.load("BeepSoundEffect.mp3")  # Replace with your actual file
+    pygame.mixer.music.play()
+
 
 # Constants and beacon definitions
 KNOWN_BEACONS = {
-    "d1:6a:3b:b4:f6:47": (0, 0),  # Beacon 1 Bottom left
+    "c0:3b:fc:7b:f4:52": (0, 0),  # Beacon 6 Position unknown
+    # "d1:6a:3b:b4:f6:47": (0, 0),  # Beacon 1 Bottom left
     "ee:8d:95:b2:16:42": (5, 0),  # Beacon 2 Bottom right
     "f4:7d:ee:dc:b8:5c": (0, 5),  # Beacon 3 Top left
-    "fd:4d:6b:06:3d:1e": (5, 5),  # Beacon 4 Top right
+    "fd:4d:6b:06:3d:1e": (5, 5),  # Beacon 4 Top right 
 }
 
 UNKNOWN_BEACONS = {
     "f6:5b:d3:35:e4:91",  # Beacon 5 Position unknown
-    "c0:3b:fc:7b:f4:52",  # Beacon 6 Position unknown
+    # "c0:3b:fc:7b:f4:52",  # Beacon 6 Position unknown
 }
 
 TX_Power = -72  # Adjust TX power if needed
@@ -42,7 +50,6 @@ def get_distance(rssi, tx_power=TX_Power, n=ENV_Factor):
             # Catch other potential errors and exit the loop or return None
             print(f"Unexpected error: {e}")
             return None  # Return None or handle as needed
-
 def scan_beacon(scan_time=10):
     """Scan for Bluetooth devices and get their distances"""
     print("Scanning for Bluetooth devices...")
@@ -112,7 +119,6 @@ def triangulate(beacon_distances):
         )[0]
         
         return result.flatten()
-
 def start_bluetooth_scanning():
     """Start continuous Bluetooth scanning and triangulation"""
     while True:
@@ -129,6 +135,11 @@ def start_bluetooth_scanning():
             print("Unknown Devices Detected:")
             for mac in unknown_devices:
                 print(f"  - {mac}")
+                
+                # Play sound if unknown device is detected
+                print("Unknown beacon detected, playing sound...")
+        else:
+            play_alert_sound()  # Path to your sound file
         
         # If there are at least 2 known beacons, try to estimate the position of unknown beacons
         if len(known_distance) >= 2:

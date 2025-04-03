@@ -10,23 +10,17 @@ from ultrasonic_sensor import ultrasonic
 import subprocess
 import threading
 import time
+import multiprocessing
 from ultrasonic_sensor.ultrasonic import scanned_items
 
-# Thread for running Bluetooth scan
-def run_bluetooth_thread():
-    triangulate.start_bluetooth_scanning()  # Start Bluetooth scanning in the background
+# Process for running Bluetooth scan
+def run_bluetooth_process():
+    triangulate.start_bluetooth_scanning()  # Start Bluetooth scanning
 
-# Create and start a thread for Bluetooth scanning
-bluetooth_thread = threading.Thread(target=run_bluetooth_thread, daemon=True)
-bluetooth_thread.start()
+# Create and start separate processes
+bluetooth_process = multiprocessing.Process(target=run_bluetooth_process, daemon=True)
 
-
-# Thread for running Bluetooth scan
-def run_ultrasonic_thread():
-    ultrasonic.measure_distances()  # Start Bluetooth scanning in the background
-
-ultrasonic_thread = threading.Thread(target=run_ultrasonic_thread, daemon=True)
-ultrasonic_thread.start()
+bluetooth_process.start()
 
 # Set UI Theme
 ctk.set_appearance_mode("dark")
@@ -386,7 +380,6 @@ def reset_ui():
     step4_label.configure(text="Step 4: Return Tray", text_color="white")
     step5_label.configure(text="Step 5: Confirm", text_color="white")
     canvas.pack_forget()  # Hide the webcam feed on reset
-
 
 # Run Main Loop
 app.mainloop()

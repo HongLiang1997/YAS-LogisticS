@@ -3,7 +3,6 @@ from ultralytics import YOLO
 import tkinter as tk
 from PIL import Image, ImageTk
 import time
-import threading
 
 def identify_objects_yolo_from_webcam(update_status_callback, canvas, target_labels):
     """Identifies objects using YOLOv8 and calls the update_status_callback to update the UI."""
@@ -15,10 +14,9 @@ def identify_objects_yolo_from_webcam(update_status_callback, canvas, target_lab
 
     detected_objects = {"charger_box": False, "sdcard_reader": False}  # Track detection status for both objects
     last_detection_time = 0  # To track when both objects were last detected
-    detection_duration = 5  # Time (in seconds) both objects should be detected for
+    detection_duration = 15  # Time (in seconds) both objects should be detected for
     
     frame_count = 0
-    detection_threshold = 5  # Process every 5th frame to reduce load
     scan_complete = False  # Flag to control the flow and stop recursion
 
     update_status_callback(f"Scanning items...", 0.6, "cyan")

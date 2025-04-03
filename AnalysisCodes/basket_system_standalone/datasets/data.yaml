@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['charger_box', 'hdmi_cable', 'rpi_box', 'sdcard_reader']
+
+roboflow:
+  workspace: yasproject
+  project: yas_logistics
+  version: 4
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/yasproject/yas_logistics/dataset/4
