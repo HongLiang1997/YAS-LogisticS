@@ -154,6 +154,54 @@ This script processes an image containing multiple boxes to detect whether an it
   
 ---
 
+#### Web API
+
+Backend (Java Spring Boot + PostgreSQL)
+Spring Boot Framework: A lightweight Java-based framework for building scalable RESTful APIs.
+
+PostgreSQL Database: A robust, open-source relational database for storing structured data.
+
+Spring Data JPA: To handle ORM (Object-Relational Mapping) with PostgreSQL.
+
+Spring Security: For authentication and authorization (e.g., JWT-based authentication).
+
+Spring Boot Actuator: For monitoring and managing the application.
+
+Spring Cloud (Optional): If microservices or distributed systems are involved.
+
+Frontend (React Admin Portal)
+ReactJS: A modern frontend framework for building dynamic user interfaces.
+
+React Router: For navigation between different pages in the admin portal.
+
+Redux or Context API: To manage application state.
+
+Material UI or Tailwind CSS: For a clean and responsive UI.
+
+Axios or Fetch API: To communicate with the backend.
+
+Deployment & Infrastructure
+Centralized Server: Hosted on AWS, DigitalOcean, or any cloud provider.
+
+Docker & Kubernetes: To containerize and orchestrate services.
+
+Nginx or Apache: For serving the frontend and acting as a reverse proxy.
+
+CI/CD Pipeline: Using GitHub Actions, Jenkins, or GitLab CI/CD for continuous deployment.
+
+Monitoring & Logging: Prometheus, Grafana, ELK stack for logs and metrics.
+
+### Bluetooth Beacon Logic
+1. Beacons are placed around the room in a rectangle as a perimeter, and inside each basket
+2. Beacons are on and always broadcasting
+3. Raspberry Pi 4 will receive Beacon RSSI from around the room and basket
+4. Raspberry Pi 4 will take RSSI and calculate its distance
+5. Raspberry Pi 4 will calculate the position of basket by triangluation
+
+
+### Ultrasonic Logic
+Ultrasonic will detect if tray is in the bay. The removal of tray from the bay will cause the distance detected by the Ultrasonic to be larger then set threshold, which will send notify backend servers that the tray has been loaned out. 
+
 ### Before and After Image Comparison
 Below are sample images demonstrating the **Before and After** item detection process:
 
